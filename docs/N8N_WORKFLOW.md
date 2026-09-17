@@ -109,6 +109,15 @@ of polling forever. Default `maxAttempts: 80` at `pollSeconds: 15` caps a stuck 
 at ~20 minutes, comfortably above the API's own 10-minute UniScribe poll timeout —
 so in the normal case, the API itself reports `"failed"` well before this kicks in.
 
+## Testing: always resubmit the form, never use n8n's "Retry"
+
+n8n's **Retry** button on a past execution replays it from *saved* execution data,
+not a fresh HTTP request — and file uploads are one of the more fragile things to
+replay that way. If you retry an execution that involved uploading a file, you may
+see `Unexpected end of form` from the API (the upload arrives truncated). This is
+an n8n replay artifact, not a bug in this workflow or the API — a genuinely fresh
+form submission in the browser is the correct way to test again.
+
 ## A note on how this was built
 
 I authored this workflow's JSON by hand rather than exporting it from a running
