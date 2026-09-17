@@ -15,6 +15,7 @@ reveal:
   # "karaoke"      - full sentence visible, active word highlighted
   # "focus-word"   - word-pop + faded prev/next word context, progress bar, elapsed timer
   # "clean-feed"   - continuous flowing paragraph, spoken word bold, past/future text faded
+  # "lyrics-scroll" - song-lyrics style: lines scroll vertically, previous above, current bold/centered
   # "vertical-show" - cover photo + title + waveform card, captions in lower third
   # "orbit"        - circular avatar + radial spectrum + episode dots, captions in lower third
   style: word-pop

@@ -25,6 +25,12 @@ export const REVEAL_STYLE_CATALOG = [
     requiresShowMetadata: false,
   },
   {
+    id: "lyrics-scroll",
+    label: "Lyrics Scroll",
+    description: "Song-lyrics style: lines scroll vertically, previous lines above, current line bold and centered.",
+    requiresShowMetadata: false,
+  },
+  {
     id: "vertical-show",
     label: "Vertical Show",
     description: "Cover photo + title + waveform card, with word-pop captions in the lower third.",

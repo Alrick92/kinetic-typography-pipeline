@@ -14,7 +14,7 @@ const configSchema = z.object({
     directory: z.string().min(1),
   }),
   reveal: z.object({
-    style: z.enum(["word-pop", "karaoke", "focus-word", "clean-feed", "vertical-show", "orbit"]),
+    style: z.enum(["word-pop", "karaoke", "focus-word", "clean-feed", "lyrics-scroll", "vertical-show", "orbit"]),
   }),
   text: z.object({
     font: z.string().min(1),

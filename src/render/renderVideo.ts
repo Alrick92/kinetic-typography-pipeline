@@ -17,6 +17,7 @@ const REVEAL_STYLE_TO_COMPOSITION: Record<string, string> = {
   karaoke: "Karaoke",
   "focus-word": "FocusWord",
   "clean-feed": "CleanFeed",
+  "lyrics-scroll": "LyricsScroll",
   "vertical-show": "VerticalShow",
   orbit: "Orbit",
 };

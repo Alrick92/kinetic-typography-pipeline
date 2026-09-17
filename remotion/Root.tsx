@@ -4,6 +4,7 @@ import { WordPopComposition } from "./compositions/WordPop";
 import { KaraokeComposition } from "./compositions/Karaoke";
 import { FocusWordComposition } from "./compositions/FocusWord";
 import { CleanFeedComposition } from "./compositions/CleanFeed";
+import { LyricsScrollComposition } from "./compositions/LyricsScroll";
 import { VerticalShowComposition } from "./compositions/VerticalShow";
 import { OrbitComposition } from "./compositions/Orbit";
 import { defaultInputProps, type RenderInputProps } from "./props";
@@ -26,6 +27,7 @@ const COMPOSITIONS: { id: string; component: React.FC<RenderInputProps>; schedul
   { id: "Karaoke", component: KaraokeComposition, schedule: KARAOKE_SCHEDULE },
   { id: "FocusWord", component: FocusWordComposition },
   { id: "CleanFeed", component: CleanFeedComposition },
+  { id: "LyricsScroll", component: LyricsScrollComposition, schedule: KARAOKE_SCHEDULE },
   { id: "VerticalShow", component: VerticalShowComposition },
   { id: "Orbit", component: OrbitComposition },
 ];

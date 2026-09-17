@@ -24,7 +24,14 @@ export interface TranscriptResult {
   durationSec?: number;
 }
 
-export type RevealStyle = "word-pop" | "karaoke" | "focus-word" | "clean-feed" | "vertical-show" | "orbit";
+export type RevealStyle =
+  | "word-pop"
+  | "karaoke"
+  | "focus-word"
+  | "clean-feed"
+  | "lyrics-scroll"
+  | "vertical-show"
+  | "orbit";
 
 export interface WordPopSchedule {
   style: "word-pop";

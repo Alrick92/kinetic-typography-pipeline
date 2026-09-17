@@ -120,6 +120,10 @@ code changes needed.
 - `clean-feed`: continuous flowing paragraph — a window of words around the current
   one, spoken word bold and in `highlightColor`, already-spoken words dimmed, upcoming
   words dimmer still. No scrolling/layout measurement; the window just shifts forward.
+- `lyrics-scroll`: song-lyrics style — one line (transcript phrase) per line, vertically
+  centered; the current line is bold/highlighted, previous lines sit above (dimmed,
+  already scrolled past), upcoming lines below. Smoothly animates to the next line's
+  position each time the active phrase advances, rather than jumping instantly.
 - `vertical-show`: a "show card" (circular cover image, title, horizontal waveform,
   description) in the upper frame, with word-pop captions in the lower third. Needs
   `show.title` / `show.coverImagePath` / `show.description` (see below).
