@@ -22,33 +22,34 @@ const style = (process.argv[2] as RevealStyle) ?? "word-pop";
 const backgroundType = (process.argv[3] as "solid" | "gradient" | "waveform") ?? "solid";
 const backgroundColorName = process.argv[4];
 
-const SENTENCE = "the quick brown fox jumps over the lazy dog while the sun sets slowly near the old stone bridge";
-const WORD_DURATION = 0.4;
-
-const PHRASE_SIZE = 4;
-const PHRASE_GAP = 1.2; // seconds of silence between phrases, to test behavior during pauses
-// Real ASR word timestamps never abut exactly — there's always a little silence between
-// words. Modelling that here keeps "what happens between two words" under test.
-const WORD_GAP = 0.12;
+// Shaped like real UniScribe output: a few long, punctuated segments of continuous
+// speech (not tidy short phrases), with words carrying their own punctuation.
+const SEGMENTS = [
+  "I think it's fine now. I don't look back as much, even if I haven't forgotten everything. Some things built me up, and others brought me to my knees. I lost time trying to understand why certain people left.",
+  "Now I believe some answers were never meant to arrive. I thought I had to hold on alone, that asking was weakness. Today I stop chasing what wanted to go, and I stop forcing the stories that were never going to work.",
+];
+const WORD_GAP = 0.12; // real word timestamps never abut exactly
+const SENTENCE_GAP = 0.35;
+const SEGMENT_GAP = 1.2;
 
 function buildFakeTranscript(): TranscriptResult {
-  const tokens = SENTENCE.split(" ");
   const phrases: Phrase[] = [];
   let t = 0;
-  for (let i = 0; i < tokens.length; i += PHRASE_SIZE) {
-    const chunk = tokens.slice(i, i + PHRASE_SIZE);
-    const chunkWords = chunk.map((text, wi) => {
-      const start = t + wi * (WORD_DURATION + WORD_GAP);
-      return { text, start, end: start + WORD_DURATION };
+  for (const segment of SEGMENTS) {
+    const segmentWords = segment.split(" ").map((text) => {
+      const start = t;
+      const end = start + 0.18 + text.length * 0.04;
+      t = end + (/[.!?]$/.test(text) ? SENTENCE_GAP : WORD_GAP);
+      return { text, start, end };
     });
     phrases.push({
-      text: chunk.join(" "),
-      start: chunkWords[0].start,
-      end: chunkWords[chunkWords.length - 1].end,
-      words: chunkWords,
+      text: segment,
+      start: segmentWords[0].start,
+      end: segmentWords[segmentWords.length - 1].end,
+      words: segmentWords,
       wordsInterpolated: false,
     });
-    t = chunkWords[chunkWords.length - 1].end + PHRASE_GAP;
+    t = segmentWords[segmentWords.length - 1].end + SEGMENT_GAP;
   }
   const words = phrases.flatMap((p) => p.words);
   return { granularity: "word", phrases, words, durationSec: words[words.length - 1].end };

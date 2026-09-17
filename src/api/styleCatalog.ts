@@ -11,7 +11,7 @@ export const REVEAL_STYLE_CATALOG = [
   {
     id: "karaoke",
     label: "Karaoke",
-    description: "Full sentence visible, active word highlighted as it's spoken.",
+    description: "One short line at a time; words light up and stay lit as they're spoken.",
     requiresShowMetadata: false,
   },
   {

@@ -18,9 +18,11 @@ audio file -> UniScribe (transcribe) -> timestamp parse (+ interpolation fallbac
   timestamps, `src/transcript/interpolate.ts` distributes each phrase's duration
   across its words proportionally to word length.
 - **Animation schedule** (`src/animation/schedule.ts`): converts the transcript into
-  either a flat list of word cues (used by word-pop, focus-word, clean-feed, and the
-  caption strip in vertical-show/orbit) or phrase cues with per-word highlight windows
-  (karaoke).
+  either a flat list of word cues (used by word-pop, focus-word, and the caption strip
+  in vertical-show/orbit) or line cues with per-word timing (karaoke, lyrics-scroll,
+  clean-feed). Transcript segments can be a minute of continuous speech, so
+  `src/animation/lines.ts` splits each one into short lyric-length lines — at sentence
+  ends, clause punctuation and pauses, then into evenly sized lines if still too long.
 - **Rendering** (`src/render/renderVideo.ts` + `remotion/`): bundles the Remotion
   project and renders the composition matching `reveal.style` to MP4 (H.264/AAC).
 - **Orchestration**: `src/cli.ts` for one-shot CLI runs, `src/webhook.ts` for an
@@ -114,9 +116,8 @@ code changes needed.
 ### Reveal styles
 
 - `word-pop`: one word centered on screen at a time, replaced as the audio progresses.
-- `karaoke`: full sentence/segment visible (wraps to fit the frame), the active word and
-  all already-spoken words in that segment rendered in `highlightColor`, upcoming words
-  in the base color.
+- `karaoke`: one short line visible at a time, the active word and all already-spoken
+  words in that line rendered in `highlightColor`, upcoming words in the base color.
 - `focus-word`: word-pop, plus faded previous/next word context above and below,
   the active word on a rounded `highlightColor` card, an elapsed/total timer, and a
   bottom progress bar.
