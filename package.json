@@ -1,0 +1,47 @@
+{
+  "name": "kinetic-typography-pipeline",
+  "version": "0.1.0",
+  "description": "Audio-to-kinetic-typography video pipeline (UniScribe transcription + Remotion rendering)",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "kinetic": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "cli": "tsx src/cli.ts",
+    "webhook": "tsx src/webhook.ts",
+    "studio": "remotion studio remotion/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test:uniscribe": "tsx scripts/test-uniscribe-connection.ts",
+    "test:render": "tsx scripts/smoketest-render.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.525",
+    "@remotion/cli": "4.0.525",
+    "@remotion/google-fonts": "4.0.525",
+    "@remotion/media-utils": "4.0.525",
+    "@remotion/renderer": "4.0.525",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "multer": "^2.4.0",
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.525",
+    "srt-parser-2": "^1.2.3",
+    "yaml": "^2.6.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.9.0",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,15 @@
+# Bright solid lime-green card look (matches the Hypnotype-style reference:
+# solid background, dark text, no stroke/outline). Works well with
+# vertical-show, orbit, and clean-feed.
+#
+# Usage: npm run cli -- render -i data/episode.mp3 --config config/presets/lime-show.yaml
+
+background:
+  type: solid
+  color: "#CFFB3C"
+
+text:
+  color: "#111111"
+  highlightColor: "#111111"
+  strokeColor: "#111111"
+  strokeWidth: 0

@@ -1,0 +1,19 @@
+services:
+  kinetic-typography:
+    build: .
+    container_name: kinetic-typography
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - WEBHOOK_PORT=4000
+    ports:
+      - "4000:4000"
+    volumes:
+      # Mount your shared "hot folder" so n8n and this container agree on paths
+      # (audioFilePath in the /render request body must resolve inside this container).
+      - ./data:/app/data
+      - ./output:/app/output
+      - ./.cache:/app/.cache
+    # Behind NGINX Proxy Manager: point a proxy host at this container's 4000 port
+    # if UniScribe needs to reach PUBLIC_BASE_URL/uniscribe/webhook (mode: "webhook").

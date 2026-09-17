@@ -1,0 +1,61 @@
+# Kinetic Typography Pipeline — default config
+# Override any of this via --config path/to/your.yaml on the CLI, or via
+# the JSON body of a webhook trigger (top-level keys are shallow-merged over this file).
+
+output:
+  # "vertical" -> 1080x1920 (Shorts/TikTok/Reels), "horizontal" -> 1920x1080
+  orientation: vertical
+  width: 1080
+  height: 1920
+  fps: 30
+  directory: ./output
+
+reveal:
+  # "word-pop"     - single word centered, replaced as speech progresses
+  # "karaoke"      - full sentence visible, active word highlighted
+  # "focus-word"   - word-pop + faded prev/next word context, progress bar, elapsed timer
+  # "clean-feed"   - continuous flowing paragraph, spoken word bold, past/future text faded
+  # "vertical-show" - cover photo + title + waveform card, captions in lower third
+  # "orbit"        - circular avatar + radial spectrum + episode dots, captions in lower third
+  style: word-pop
+
+text:
+  font: "Space Grotesk"
+  fontSize: 90
+  color: "#FFFFFF"
+  highlightColor: "#FFD400"
+  strokeColor: "#000000"
+  strokeWidth: 8
+  # "center" | "lower-third"
+  position: center
+
+background:
+  # "solid" | "gradient" | "video" | "waveform"
+  type: solid
+  color: "#111111"
+  gradient:
+    from: "#1e1e2f"
+    to: "#0a0a12"
+    angle: 135
+  # path to a looping video/image, required when type: video
+  mediaPath: null
+  # loop length (seconds) used to repeat a short background video clip; ignored for images
+  videoLoopSec: 5
+  waveform:
+    color: "#FFD400"
+    style: bars
+
+uniscribe:
+  # Polling interval/timeout used when webhook completion isn't available
+  pollIntervalMs: 45000
+  pollTimeoutMs: 600000
+
+# Used only by the "vertical-show" and "orbit" reveal styles.
+show:
+  # falls back to the audio filename (without extension) when not set
+  title: null
+  coverImagePath: null
+  description: null
+  episodeLabel: null
+  # number of dots in the Orbit template's progress indicator
+  totalChapters: 12

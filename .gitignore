@@ -1,0 +1,23 @@
+node_modules/
+dist/
+out/
+.cache/
+output/
+.env
+*.log
+.DS_Store
+
+# user-supplied input audio/video — never commit real (often copyrighted) media.
+# smoketest.wav is our own synthetic sine-wave fixture (see scripts/), safe to keep.
+data/*
+!data/.gitkeep
+!data/smoketest.wav
+data/uploads/
+
+# copied into remotion/public at render time; see src/render/renderVideo.ts
+remotion/public/audio/*
+!remotion/public/audio/.gitkeep
+remotion/public/backgrounds/*
+!remotion/public/backgrounds/.gitkeep
+remotion/public/show/*
+!remotion/public/show/.gitkeep
