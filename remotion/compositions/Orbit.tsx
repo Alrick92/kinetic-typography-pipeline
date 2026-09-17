@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
 import { Background } from "../backgrounds/Background";
-import { findActiveCueIndex } from "../util/findActiveCue";
+import { findAnchorCueIndex } from "../util/findActiveCue";
 import { PopWord } from "../shared/PopWord";
 import { AvatarImage } from "../shared/AvatarImage";
 import { RadialSpectrum } from "../shared/RadialSpectrum";
@@ -18,7 +18,9 @@ export const OrbitComposition: React.FC<RenderInputProps> = ({ schedule, config,
     throw new Error("OrbitComposition received a non-word-pop schedule");
   }
 
-  const activeIndex = findActiveCueIndex(schedule.cues, timeSec);
+  // Anchored so the caption word holds through the silence before the next one
+  // instead of blanking out for a few frames on every word boundary.
+  const activeIndex = findAnchorCueIndex(schedule.cues, timeSec);
   const cue = activeIndex >= 0 ? schedule.cues[activeIndex] : null;
 
   const avatarSize = width * 0.32;

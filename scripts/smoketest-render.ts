@@ -27,6 +27,9 @@ const WORD_DURATION = 0.4;
 
 const PHRASE_SIZE = 4;
 const PHRASE_GAP = 1.2; // seconds of silence between phrases, to test behavior during pauses
+// Real ASR word timestamps never abut exactly — there's always a little silence between
+// words. Modelling that here keeps "what happens between two words" under test.
+const WORD_GAP = 0.12;
 
 function buildFakeTranscript(): TranscriptResult {
   const tokens = SENTENCE.split(" ");
@@ -34,7 +37,10 @@ function buildFakeTranscript(): TranscriptResult {
   let t = 0;
   for (let i = 0; i < tokens.length; i += PHRASE_SIZE) {
     const chunk = tokens.slice(i, i + PHRASE_SIZE);
-    const chunkWords = chunk.map((text, wi) => ({ text, start: t + wi * WORD_DURATION, end: t + (wi + 1) * WORD_DURATION }));
+    const chunkWords = chunk.map((text, wi) => {
+      const start = t + wi * (WORD_DURATION + WORD_GAP);
+      return { text, start, end: start + WORD_DURATION };
+    });
     phrases.push({
       text: chunk.join(" "),
       start: chunkWords[0].start,

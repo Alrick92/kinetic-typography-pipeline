@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
 import { Background } from "../backgrounds/Background";
-import { findActiveCueIndex } from "../util/findActiveCue";
+import { findAnchorCueIndex } from "../util/findActiveCue";
 import { resolveFontFamily } from "../shared/fonts";
 
 export const KaraokeComposition: React.FC<RenderInputProps> = ({ schedule, config, audioFileName }) => {
@@ -14,9 +14,14 @@ export const KaraokeComposition: React.FC<RenderInputProps> = ({ schedule, confi
     throw new Error("KaraokeComposition received a non-karaoke schedule");
   }
 
-  const activePhraseIndex = findActiveCueIndex(schedule.cues, timeSec);
+  // Anchored to the most recently *started* phrase/word rather than the strictly active
+  // one. A strict "active right now" lookup finds nothing in the silence between two
+  // words — and real word timestamps always leave a gap there — which would drop every
+  // already-highlighted word back to the base color for those few frames, i.e. the line
+  // blinks on every single word boundary. The same holds between phrases.
+  const activePhraseIndex = findAnchorCueIndex(schedule.cues, timeSec);
   const phrase = activePhraseIndex >= 0 ? schedule.cues[activePhraseIndex] : null;
-  const activeWordIndex = phrase ? findActiveCueIndex(phrase.words, timeSec) : -1;
+  const activeWordIndex = phrase ? findAnchorCueIndex(phrase.words, timeSec) : -1;
 
   const justifyContent = config.text.position === "center" ? "center" : "flex-end";
   const paddingBottom = config.text.position === "lower-third" ? 180 : 0;

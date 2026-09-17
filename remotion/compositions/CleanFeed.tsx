@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
 import { Background } from "../backgrounds/Background";
-import { findActiveCueIndex, findAnchorCueIndex } from "../util/findActiveCue";
+import { findAnchorCueIndex } from "../util/findActiveCue";
 import { resolveFontFamily } from "../shared/fonts";
 
 // Lines sit in fixed slots (one per transcript phrase) and the whole stack smoothly
@@ -51,14 +51,10 @@ export const CleanFeedComposition: React.FC<RenderInputProps> = ({ schedule, con
             const isCurrent = anchorIndex >= 0 && lineIndex === anchor;
             const distance = Math.abs(lineIndex - anchor);
             const offsetPx = (lineIndex - scrollPosition) * lineHeight;
-            // Once the line's own time window has passed (silence gap before the next
-            // line starts), treat every word as already spoken instead of falling back
-            // to "no active word", which would otherwise dim the whole line back down.
-            const activeWordIndex = isCurrent
-              ? timeSec >= line.end
-                ? line.words.length
-                : findActiveCueIndex(line.words, timeSec)
-              : -1;
+            // Anchored for the same reason as the line above: a strict "active right now"
+            // lookup finds nothing in the silence between two words, which would dim every
+            // already-spoken word back down for those frames (a blink on every word).
+            const activeWordIndex = isCurrent ? findAnchorCueIndex(line.words, timeSec) : -1;
             // The immediate previous/next line gets a clear, distinct opacity of its own
             // (not just the next step down from "current") so it reads as visible context
             // during the scroll transition, rather than fading in from near-invisible.

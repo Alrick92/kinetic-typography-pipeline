@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
 import { Background } from "../backgrounds/Background";
-import { findActiveCueIndex } from "../util/findActiveCue";
+import { findAnchorCueIndex } from "../util/findActiveCue";
 import { PopWord } from "../shared/PopWord";
 import { ProgressBar } from "../shared/ProgressBar";
 import { resolveFontFamily } from "../shared/fonts";
@@ -22,7 +22,10 @@ export const FocusWordComposition: React.FC<RenderInputProps> = ({ schedule, con
     throw new Error("FocusWordComposition received a non-word-pop schedule");
   }
 
-  const activeIndex = findActiveCueIndex(schedule.cues, timeSec);
+  // Anchored to the most recently started word, so the word (and its prev/next context)
+  // holds through the silence before the next one instead of blanking out for a few
+  // frames on every word boundary.
+  const activeIndex = findAnchorCueIndex(schedule.cues, timeSec);
   const cue = activeIndex >= 0 ? schedule.cues[activeIndex] : null;
   const prevCue = activeIndex > 0 ? schedule.cues[activeIndex - 1] : null;
   const nextCue = activeIndex >= 0 && activeIndex < schedule.cues.length - 1 ? schedule.cues[activeIndex + 1] : null;

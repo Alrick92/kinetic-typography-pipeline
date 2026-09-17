@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
 import { Background } from "../backgrounds/Background";
-import { findActiveCueIndex } from "../util/findActiveCue";
+import { findAnchorCueIndex } from "../util/findActiveCue";
 import { resolveFontFamily } from "../shared/fonts";
 
 export const WordPopComposition: React.FC<RenderInputProps> = ({ schedule, config, audioFileName }) => {
@@ -14,7 +14,10 @@ export const WordPopComposition: React.FC<RenderInputProps> = ({ schedule, confi
     throw new Error("WordPopComposition received a non-word-pop schedule");
   }
 
-  const activeIndex = findActiveCueIndex(schedule.cues, timeSec);
+  // Anchored to the most recently started word, so the current word holds on screen
+  // through the silence before the next one instead of blanking out for a few frames
+  // on every word boundary (real word timestamps always leave a gap between words).
+  const activeIndex = findAnchorCueIndex(schedule.cues, timeSec);
   const cue = activeIndex >= 0 ? schedule.cues[activeIndex] : null;
 
   const justifyContent = config.text.position === "center" ? "center" : "flex-end";
