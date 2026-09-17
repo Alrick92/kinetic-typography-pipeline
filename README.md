@@ -96,8 +96,9 @@ Both return `202 { jobId, statusUrl, downloadUrl }` immediately. Poll `GET
 In n8n: an HTTP Request node posts to `/render`, then a polling loop (n8n's "Wait"
 node + another HTTP Request) checks `/render/:jobId` until done.
 
-A ready-to-import n8n workflow doing exactly this — upload an mp3, wait, return the
-finished MP4 as one synchronous call — is at
+A ready-to-import n8n workflow doing exactly this via a web form — upload an audio
+file, pick style/background/language from dropdowns, wait, and get the finished MP4
+back as one synchronous submission — is at
 [`n8n/kinetic-render-workflow.json`](n8n/kinetic-render-workflow.json), documented in
 [docs/N8N_WORKFLOW.md](docs/N8N_WORKFLOW.md).
 

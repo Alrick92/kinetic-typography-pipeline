@@ -88,7 +88,17 @@ app.post("/render", upload.fields([{ name: "audio", maxCount: 1 }, { name: "cove
     return res.status(400).json({ error: `audioFilePath does not exist on server: ${audioFilePath}` });
   }
 
-  const { languageCode, outputFileName, mode, configPath } = req.body ?? {};
+  const { languageCode, mode, configPath } = req.body ?? {};
+
+  // Uploaded files are stored under a random name (see multer config above) to avoid
+  // collisions, so default the output name from the *original* upload filename rather
+  // than that temp path — "episode.mp3" in should mean "episode.mp4" out.
+  const uploadedAudioOriginalName = files?.audio?.[0]?.originalname;
+  const outputFileName: string | undefined =
+    req.body?.outputFileName ||
+    (uploadedAudioOriginalName
+      ? `${path.basename(uploadedAudioOriginalName, path.extname(uploadedAudioOriginalName))}.mp4`
+      : undefined);
 
   let inlineOverrides: Record<string, unknown> | undefined;
   try {

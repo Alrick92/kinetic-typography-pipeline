@@ -102,7 +102,7 @@ Use this from any HTTP client that isn't sharing a filesystem with the server.
 | `audio` | file | **yes*** | The audio/video file to transcribe and render. |
 | `cover` | file | no | Cover/avatar image for `vertical-show` / `orbit` (equivalent to `show.coverImagePath`). |
 | `languageCode` | text | no | UniScribe language code, default `en`. |
-| `outputFileName` | text | no | Output MP4 filename. Defaults to `<audio filename>.mp4`. |
+| `outputFileName` | text | no | Output MP4 filename. Defaults to the **original uploaded filename** with its extension swapped to `.mp4` (e.g. `episode.mp3` → `episode.mp4`) — not the randomized name the file is stored under on disk. |
 | `style` | text | no | Shorthand for `reveal.style` (see [styles](#reveal-styles--show-metadata)). |
 | `title` | text | no | Shorthand for `show.title`. |
 | `description` | text | no | Shorthand for `show.description`. |
