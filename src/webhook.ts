@@ -10,6 +10,7 @@ import { PipelineError } from "./errors.js";
 import { logger, stageLogger } from "./logger.js";
 import { requireApiKey } from "./api/auth.js";
 import { completeJob, createJob, failJob, jobs, pendingByUniScribeId } from "./api/jobStore.js";
+import { enqueueRenderTask, queueStats } from "./api/jobQueue.js";
 import { BACKGROUND_TYPE_CATALOG, REVEAL_STYLE_CATALOG } from "./api/styleCatalog.js";
 import { finishPipelineFromTranscription, runPipeline, startTranscription, UniScribeClient } from "./pipeline.js";
 
@@ -38,6 +39,10 @@ app.get("/health", (_req, res) => {
 
 app.get("/styles", (_req, res) => {
   res.json({ revealStyles: REVEAL_STYLE_CATALOG, backgroundTypes: BACKGROUND_TYPE_CATALOG });
+});
+
+app.get("/queue", (_req, res) => {
+  res.json(queueStats());
 });
 
 function parseConfigOverrides(raw: unknown): Record<string, unknown> | undefined {
@@ -129,7 +134,7 @@ app.post("/render", upload.fields([{ name: "audio", maxCount: 1 }, { name: "cove
       if (handle.kind === "cached") {
         // Cached transcript means no UniScribe round-trip is needed; runPipeline() hits
         // the same cache and goes straight to rendering.
-        runAndTrack(localJobId, () => runPipeline({ audioFilePath, config, languageCode, outputFileName }));
+        enqueueRender(localJobId, () => runPipeline({ audioFilePath, config, languageCode, outputFileName }));
       } else {
         pendingByUniScribeId.set(handle.jobId, { localJobId, audioFilePath, audioHash: handle.audioHash, config, outputFileName });
       }
@@ -137,7 +142,7 @@ app.post("/render", upload.fields([{ name: "audio", maxCount: 1 }, { name: "cove
       recordFailure(localJobId, err);
     }
   } else {
-    runAndTrack(localJobId, () => runPipeline({ audioFilePath, config, languageCode, outputFileName }));
+    enqueueRender(localJobId, () => runPipeline({ audioFilePath, config, languageCode, outputFileName }));
   }
 
   res.status(202).json({ jobId: localJobId, statusUrl: `/render/${localJobId}`, downloadUrl: `/render/${localJobId}/download` });
@@ -180,26 +185,22 @@ app.post("/uniscribe/webhook", async (req, res) => {
   }
   if (event !== "transcription.completed") return;
 
-  try {
+  // The transcript is ready, but the actual render (the CPU/RAM-heavy part) still
+  // goes through the same queue as poll-mode jobs, so a burst of webhook completions
+  // arriving together doesn't spawn a pile of concurrent headless-Chrome renders.
+  enqueueRender(pending.localJobId, async () => {
     const client = new UniScribeClient({ apiKey: process.env.UNISCRIBE_API_KEY ?? "", baseUrl: process.env.UNISCRIBE_BASE_URL });
     const full = await client.getTranscription(data.id);
-    const outputPath = await finishPipelineFromTranscription(
-      full,
-      pending.audioFilePath,
-      pending.audioHash,
-      pending.config,
-      pending.outputFileName,
-    );
-    completeJob(pending.localJobId, outputPath);
-  } catch (err) {
-    recordFailure(pending.localJobId, err);
-  }
+    return finishPipelineFromTranscription(full, pending.audioFilePath, pending.audioHash, pending.config, pending.outputFileName);
+  });
 });
 
-function runAndTrack(localJobId: string, fn: () => Promise<string>) {
-  fn()
-    .then((outputPath) => completeJob(localJobId, outputPath))
-    .catch((err) => recordFailure(localJobId, err));
+function enqueueRender(localJobId: string, fn: () => Promise<string>) {
+  enqueueRenderTask(localJobId, () =>
+    fn()
+      .then((outputPath) => completeJob(localJobId, outputPath))
+      .catch((err) => recordFailure(localJobId, err)),
+  );
 }
 
 function recordFailure(localJobId: string, err: unknown) {

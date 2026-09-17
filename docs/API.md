@@ -15,6 +15,7 @@ direct-upload flow that has nothing to do with n8n.
 - [Endpoints](#endpoints)
   - [GET /health](#get-health)
   - [GET /styles](#get-styles)
+  - [GET /queue](#get-queue)
   - [POST /render](#post-render)
   - [GET /render/:jobId](#get-renderjobid)
   - [GET /render/:jobId/download](#get-renderjobiddownload)
@@ -87,6 +88,15 @@ hardcoding the list client-side.
 ```
 `requiresShowMetadata: true` marks styles (`vertical-show`, `orbit`) that read the
 `show.*` fields described [below](#reveal-styles--show-metadata).
+
+### `GET /queue`
+
+Current render-queue state — how many renders are actively running vs. waiting.
+
+**Response `200`**
+```json
+{ "running": 1, "waiting": 2, "maxConcurrentRenders": 1 }
+```
 
 ### `POST /render`
 
@@ -166,7 +176,10 @@ Poll this until `status` is `completed` or `failed`.
 
 **Response `200`**
 ```json
-{ "status": "processing", "createdAt": "2026-01-15T10:30:00.000Z", "updatedAt": "2026-01-15T10:30:00.000Z" }
+{ "status": "queued", "queuePosition": 2, "createdAt": "2026-01-15T10:30:00.000Z", "updatedAt": "2026-01-15T10:30:00.000Z" }
+```
+```json
+{ "status": "processing", "createdAt": "2026-01-15T10:30:00.000Z", "updatedAt": "2026-01-15T10:30:05.000Z" }
 ```
 ```json
 { "status": "completed", "outputPath": "/app/output/episode.mp4", "createdAt": "...", "updatedAt": "..." }
@@ -174,6 +187,11 @@ Poll this until `status` is `completed` or `failed`.
 ```json
 { "status": "failed", "error": "UniScribe API key is invalid or missing. ...", "createdAt": "...", "updatedAt": "..." }
 ```
+
+`queued` means the job is waiting for a render slot (see [Queueing](#queueing)) —
+`queuePosition` is its 1-based place in that line, and only appears while queued.
+`processing` covers everything actively happening: contacting UniScribe, waiting
+for transcription, and the render itself.
 
 `404` if the job id is unknown (never existed, or the server restarted — see
 [operational notes](#limits--operational-notes)).
@@ -183,7 +201,7 @@ Poll this until `status` is `completed` or `failed`.
 Streams the finished MP4 (`Content-Type: video/mp4`, as an attachment).
 
 - `404` — unknown job id.
-- `409` — job exists but isn't completed yet (`{ "error": "job is processing, not ready for download" }`).
+- `409` — job exists but isn't completed yet (`{ "error": "job is queued, not ready for download" }` or `"job is processing, ..."`).
 - `410` — job completed but the output file has since been deleted from disk.
 
 ### `POST /uniscribe/webhook` (internal)
@@ -193,10 +211,31 @@ with `mode: "webhook"`. You should never call this yourself — it's documented 
 only so the request shape isn't a mystery in logs. Always responds `200` immediately
 (UniScribe requires a 2xx ack within 30s) and does the real work asynchronously.
 
+## Queueing
+
+Every render (transcription-wait + the actual headless-Chrome render) goes through
+a FIFO queue capped by `MAX_CONCURRENT_RENDERS` (default `1`) — see
+[.env.example](../.env.example). Extra requests beyond that limit sit as `status:
+"queued"` until a slot frees up, rather than all running at once. This exists
+because each render is CPU/RAM-heavy; letting a burst of requests spawn that many
+concurrent Chromium instances on a modest VPS would starve all of them rather than
+speed anything up. Raise `MAX_CONCURRENT_RENDERS` only if you've confirmed the host
+can handle that many concurrent renders without degrading each one.
+
+For `mode: "webhook"` jobs specifically, only the actual render step (once
+UniScribe's callback arrives) goes through this queue — the initial upload and
+transcription request to UniScribe happens immediately, since that step is
+network-bound rather than CPU-heavy and delaying it would just slow down
+transcription for no benefit.
+
+Check `GET /queue` for current queue depth, or a job's own `queuePosition` field
+while it's `queued`.
+
 ## Job lifecycle
 
-Every job starts `processing` and ends at `completed` or `failed`. Internally there
-are two ways a job gets from one to the other, chosen by `mode`:
+Every job starts `processing` (or `queued`, once it reaches the render step — see
+[Queueing](#queueing)) and ends at `completed` or `failed`. Internally there
+are two ways a job gets from start to finish, chosen by `mode`:
 
 - **`mode: "poll"`** (default): the server itself polls UniScribe's status endpoint
   (every `uniscribe.pollIntervalMs`, default 45s) until the transcription finishes,
