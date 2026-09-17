@@ -1,7 +1,6 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
-import { Background } from "../backgrounds/Background";
 import { findAnchorCueIndex } from "../util/findActiveCue";
 import { PopWord } from "../shared/PopWord";
 import { AvatarImage } from "../shared/AvatarImage";
@@ -31,7 +30,6 @@ export const OrbitComposition: React.FC<RenderInputProps> = ({ schedule, config,
 
   return (
     <AbsoluteFill>
-      <Background config={config.background} audioFileName={audioFileName} />
       <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", gap: 20 }}>
         <div style={{ width: spectrumSize, height: spectrumSize, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <RadialSpectrum

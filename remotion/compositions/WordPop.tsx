@@ -1,11 +1,10 @@
 import React from "react";
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
-import { Background } from "../backgrounds/Background";
 import { findAnchorCueIndex } from "../util/findActiveCue";
 import { resolveFontFamily } from "../shared/fonts";
 
-export const WordPopComposition: React.FC<RenderInputProps> = ({ schedule, config, audioFileName }) => {
+export const WordPopComposition: React.FC<RenderInputProps> = ({ schedule, config }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const timeSec = frame / fps;
@@ -38,7 +37,6 @@ export const WordPopComposition: React.FC<RenderInputProps> = ({ schedule, confi
 
   return (
     <AbsoluteFill>
-      <Background config={config.background} audioFileName={audioFileName} />
       <AbsoluteFill
         style={{ justifyContent, alignItems: "center", paddingBottom }}
       >

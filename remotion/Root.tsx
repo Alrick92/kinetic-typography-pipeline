@@ -8,16 +8,21 @@ import { LyricsScrollComposition } from "./compositions/LyricsScroll";
 import { VerticalShowComposition } from "./compositions/VerticalShow";
 import { OrbitComposition } from "./compositions/Orbit";
 import { defaultInputProps, type RenderInputProps } from "./props";
+import { Background } from "./backgrounds/Background";
+import { TextLayer } from "./shared/TextLayer";
 import type { AnimationSchedule } from "../src/types";
 
-const withAudio = (Comp: React.FC<RenderInputProps>): React.FC<RenderInputProps> => {
-  const WithAudio: React.FC<RenderInputProps> = (props) => (
+const withFrame = (Comp: React.FC<RenderInputProps>): React.FC<RenderInputProps> => {
+  const WithFrame: React.FC<RenderInputProps> = (props) => (
     <AbsoluteFill>
-      <Comp {...props} />
+      <Background config={props.config.background} audioFileName={props.audioFileName} />
+      <TextLayer config={props.config}>
+        <Comp {...props} />
+      </TextLayer>
       <Audio src={staticFile(props.audioFileName)} />
     </AbsoluteFill>
   );
-  return WithAudio;
+  return WithFrame;
 };
 
 const KARAOKE_SCHEDULE: AnimationSchedule = { style: "karaoke", cues: [] };
@@ -39,7 +44,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           key={id}
           id={id}
-          component={withAudio(component)}
+          component={withFrame(component)}
           durationInFrames={Math.ceil(defaultInputProps.durationSec * defaultInputProps.config.output.fps)}
           fps={defaultInputProps.config.output.fps}
           width={defaultInputProps.config.output.width}

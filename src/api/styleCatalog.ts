@@ -53,7 +53,8 @@ export const BACKGROUND_TYPE_CATALOG = [
   {
     id: "waveform",
     label: "Waveform",
-    description: "Animated audio-amplitude bars. Do not combine with vertical-show/orbit, which draw their own.",
+    description:
+      "Animated audio-amplitude bars in a strip along the bottom; text is kept above it. Do not combine with vertical-show/orbit, which draw their own.",
   },
 ] as const;
 

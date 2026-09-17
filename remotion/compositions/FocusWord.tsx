@@ -1,7 +1,6 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
-import { Background } from "../backgrounds/Background";
 import { findAnchorCueIndex } from "../util/findActiveCue";
 import { PopWord } from "../shared/PopWord";
 import { ProgressBar } from "../shared/ProgressBar";
@@ -13,7 +12,7 @@ function formatTime(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export const FocusWordComposition: React.FC<RenderInputProps> = ({ schedule, config, audioFileName, durationSec }) => {
+export const FocusWordComposition: React.FC<RenderInputProps> = ({ schedule, config, durationSec }) => {
   const frame = useCurrentFrame();
   const { fps, width } = useVideoConfig();
   const timeSec = frame / fps;
@@ -34,7 +33,6 @@ export const FocusWordComposition: React.FC<RenderInputProps> = ({ schedule, con
 
   return (
     <AbsoluteFill>
-      <Background config={config.background} audioFileName={audioFileName} />
       <AbsoluteFill style={{ padding: 48 }}>
         <div style={{ fontFamily: "monospace", fontSize: 24, color: config.text.color, opacity: 0.6 }}>
           {formatTime(timeSec)} / {formatTime(durationSec)}

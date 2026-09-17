@@ -1,7 +1,6 @@
 import React from "react";
 import { AbsoluteFill, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
-import { Background } from "../backgrounds/Background";
 import { findAnchorCueIndex } from "../util/findActiveCue";
 import { resolveFontFamily } from "../shared/fonts";
 
@@ -9,7 +8,7 @@ import { resolveFontFamily } from "../shared/fonts";
 // cheap on long transcripts without needing real scroll-position measurement.
 const WINDOW = 4;
 
-export const LyricsScrollComposition: React.FC<RenderInputProps> = ({ schedule, config, audioFileName }) => {
+export const LyricsScrollComposition: React.FC<RenderInputProps> = ({ schedule, config }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const timeSec = frame / fps;
@@ -42,7 +41,6 @@ export const LyricsScrollComposition: React.FC<RenderInputProps> = ({ schedule, 
 
   return (
     <AbsoluteFill>
-      <Background config={config.background} audioFileName={audioFileName} />
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
         <div style={{ position: "relative", width: "100%", height: 0 }}>
           {visibleLines.map((line, i) => {

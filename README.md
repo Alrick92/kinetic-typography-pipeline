@@ -170,7 +170,9 @@ instead of dedicated fields.
 - `video` — looping video or static image; set `background.mediaPath` to a file path
   (it's copied into `remotion/public/backgrounds/` automatically at render time).
 - `waveform` — animated audio-amplitude bars in `background.waveform.color` over
-  `background.color`, driven by `@remotion/media-utils`.
+  `background.color`, driven by `@remotion/media-utils`. The bars occupy a strip along
+  the bottom of the frame, and every reveal style's text is laid out above that strip
+  (and clipped to it), so text never draws over the bars.
 
 ### Extending
 

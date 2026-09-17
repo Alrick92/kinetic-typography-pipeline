@@ -1,7 +1,6 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
-import { Background } from "../backgrounds/Background";
 import { findAnchorCueIndex } from "../util/findActiveCue";
 import { PopWord } from "../shared/PopWord";
 import { AvatarImage } from "../shared/AvatarImage";
@@ -25,7 +24,6 @@ export const VerticalShowComposition: React.FC<RenderInputProps> = ({ schedule, 
 
   return (
     <AbsoluteFill>
-      <Background config={config.background} audioFileName={audioFileName} />
       <AbsoluteFill style={{ alignItems: "center", paddingTop: width * 0.14, gap: 20 }}>
         <AvatarImage path={config.show.coverImagePath} size={avatarSize} placeholderColor={config.text.highlightColor} />
         <div

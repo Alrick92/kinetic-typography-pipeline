@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { useAudioData, visualizeAudio, type AudioData } from "@remotion/media-utils";
 import { toDisplayBands } from "../util/audioBands";
+import { WAVEFORM_BAND_RATIO } from "../shared/TextLayer";
 
 const NUM_BARS = 48;
 // visualizeAudio requires a power-of-two sample count; toDisplayBands groups its
@@ -37,14 +38,17 @@ const Bars: React.FC<{
   const frequencies = visualizeAudio({ fps, frame, audioData, numberOfSamples: NUM_SAMPLES });
   const bars = toDisplayBands(frequencies, NUM_BARS);
   const barWidth = width / NUM_BARS;
-  const maxBarHeight = height * 0.25;
+  // Bars live in a strip at the bottom of the frame; TextLayer keeps all text above it.
+  const bandHeight = height * WAVEFORM_BAND_RATIO;
+  const bandCenterY = height - bandHeight / 2;
+  const maxBarHeight = bandHeight * 0.8;
 
   return (
     <svg width={width} height={height} style={{ position: "absolute", inset: 0 }}>
       {bars.map((amplitude, i) => {
         const barHeight = Math.max(4, amplitude * maxBarHeight);
         const x = i * barWidth;
-        const y = height / 2 - barHeight / 2;
+        const y = bandCenterY - barHeight / 2;
         return (
           <rect
             key={i}
