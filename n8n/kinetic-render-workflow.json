@@ -37,6 +37,7 @@
                   { "option": "focus-word" },
                   { "option": "clean-feed" },
                   { "option": "lyrics-scroll" },
+                  { "option": "quote-card" },
                   { "option": "vertical-show" },
                   { "option": "orbit" }
                 ]

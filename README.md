@@ -130,6 +130,13 @@ code changes needed.
   centered; the current line is bold/highlighted, previous lines sit above (dimmed,
   already scrolled past), upcoming lines below. Smoothly animates to the next line's
   position each time the active phrase advances, rather than jumping instantly.
+- `quote-card`: a serif pull-quote (Bodoni Moda) top-left, wrapped in curly quotes and
+  filled in a passage at a time — spoken words white, the current word lime, upcoming
+  words dark grey — then replaced by the next passage. Below it a lime rule and a
+  spaced mono label built from `show.episodeLabel` and `show.title` (e.g. "EPISODE 01 -
+  GROWTH"), and along the bottom a lime waveform line that follows the audio's loudness
+  and scrolls with it. It has its own fixed palette and fonts (not `text.*`); use a
+  dark `solid` background, not `waveform`, since it draws its own.
 - `vertical-show`: a "show card" (circular cover image, title, horizontal waveform,
   description) in the upper frame, with word-pop captions in the lower third. Needs
   `show.title` / `show.coverImagePath` / `show.description` (see below).

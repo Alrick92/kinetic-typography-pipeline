@@ -18,6 +18,7 @@ const REVEAL_STYLE_TO_COMPOSITION: Record<string, string> = {
   "focus-word": "FocusWord",
   "clean-feed": "CleanFeed",
   "lyrics-scroll": "LyricsScroll",
+  "quote-card": "QuoteCard",
   "vertical-show": "VerticalShow",
   orbit: "Orbit",
 };

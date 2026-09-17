@@ -33,6 +33,13 @@ export const REVEAL_STYLE_CATALOG = [
     requiresShowMetadata: false,
   },
   {
+    id: "quote-card",
+    label: "Quote Card",
+    description:
+      "Serif pull-quote filling in a passage at a time (spoken white, current word lime, upcoming grey), with a label and a scrolling waveform line. Has its own dark look; use a solid dark background.",
+    requiresShowMetadata: false,
+  },
+  {
     id: "vertical-show",
     label: "Vertical Show",
     description: "Cover photo + title + waveform card, with word-pop captions in the lower third.",

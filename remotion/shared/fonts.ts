@@ -1,7 +1,15 @@
 import { loadFont as loadSpaceGrotesk, fontFamily as spaceGroteskFamily } from "@remotion/google-fonts/SpaceGrotesk";
+import { loadFont as loadBodoniModa, fontFamily as bodoniModaFamily } from "@remotion/google-fonts/BodoniModa";
+import { loadFont as loadDMMono, fontFamily as dmMonoFamily } from "@remotion/google-fonts/DMMono";
 
 // Registers the @font-face rules once when this module is first imported.
 loadSpaceGrotesk("normal", { weights: ["500", "600", "700"], subsets: ["latin"] });
+loadBodoniModa("normal", { weights: ["400"], subsets: ["latin", "latin-ext"] });
+loadDMMono("normal", { weights: ["400"], subsets: ["latin"] });
+
+/** Fixed typefaces of the quote-card style (part of its look, not driven by text.font). */
+export const QUOTE_SERIF_FAMILY = bodoniModaFamily;
+export const LABEL_MONO_FAMILY = dmMonoFamily;
 
 /**
  * Resolves a configured font name to a CSS font-family string. "Space Grotesk" (the

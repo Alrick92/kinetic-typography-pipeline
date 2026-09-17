@@ -12,10 +12,11 @@ output:
 
 reveal:
   # "word-pop"     - single word centered, replaced as speech progresses
-  # "karaoke"      - full sentence visible, active word highlighted
+  # "karaoke"      - one short line at a time, spoken words highlighted
   # "focus-word"   - word-pop + faded prev/next word context, progress bar, elapsed timer
   # "clean-feed"   - continuous flowing paragraph, spoken word bold, past/future text faded
   # "lyrics-scroll" - song-lyrics style: lines scroll vertically, previous above, current bold/centered
+  # "quote-card"   - serif pull-quote filled in a passage at a time, label + scrolling waveform line (own dark look)
   # "vertical-show" - cover photo + title + waveform card, captions in lower third
   # "orbit"        - circular avatar + radial spectrum + episode dots, captions in lower third
   style: word-pop

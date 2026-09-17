@@ -57,6 +57,40 @@ export function splitIntoLines(words: Word[]): Word[][] {
   return joined.flatMap(balance);
 }
 
+const MAX_PASSAGE_CHARS = 90;
+// Once a passage has this much text, a sentence end closes it.
+const MIN_PASSAGE_CHARS_AT_SENTENCE_END = 45;
+const PASSAGE_PAUSE_SEC = 1.5;
+
+/**
+ * Packs consecutive display lines into passages — the block of text a page-style reveal
+ * (quote-card) shows at once before replacing it with the next. Never splits a line, and
+ * prefers to end a passage at a sentence end or a long pause.
+ */
+export function groupIntoPassages(lines: Word[][]): Word[][] {
+  const passages: Word[][] = [];
+  let current: Word[] = [];
+
+  lines.forEach((line, i) => {
+    if (current.length > 0 && lengthOf(current) + 1 + lengthOf(line) > MAX_PASSAGE_CHARS) {
+      passages.push(current);
+      current = [];
+    }
+    current = [...current, ...line];
+
+    const next = lines[i + 1];
+    const pause = next ? next[0].start - last(line).end : 0;
+    const endsSentence = SENTENCE_END.test(last(line).text);
+    if (pause >= PASSAGE_PAUSE_SEC || (endsSentence && lengthOf(current) >= MIN_PASSAGE_CHARS_AT_SENTENCE_END)) {
+      passages.push(current);
+      current = [];
+    }
+  });
+  if (current.length > 0) passages.push(current);
+
+  return passages;
+}
+
 function balance(piece: Word[]): Word[][] {
   const total = lengthOf(piece);
   if (total <= MAX_LINE_CHARS) return [piece];

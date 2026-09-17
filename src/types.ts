@@ -30,6 +30,7 @@ export type RevealStyle =
   | "focus-word"
   | "clean-feed"
   | "lyrics-scroll"
+  | "quote-card"
   | "vertical-show"
   | "orbit";
 

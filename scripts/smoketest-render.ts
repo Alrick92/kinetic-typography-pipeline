@@ -5,7 +5,8 @@
  * timing) in isolation, and as the "render spike" referenced in the README.
  *
  * Usage: npm run test:render -- [reveal-style] [background-type] [background-color]
- *   reveal-style: word-pop | karaoke | focus-word | clean-feed | lyrics-scroll | vertical-show | orbit
+ *   reveal-style: word-pop | karaoke | focus-word | clean-feed | lyrics-scroll | quote-card | vertical-show | orbit
+ *   SMOKETEST_ORIENTATION=horizontal renders 1920x1080 instead of the default vertical frame
  *   background-type: solid | gradient | waveform
  *   background-color: white | black | grey | silver | blue (optional preset override)
  */
@@ -57,7 +58,9 @@ function buildFakeTranscript(): TranscriptResult {
 
 async function main() {
   const audioFilePath = path.resolve("data/smoketest.wav");
+  const horizontal = process.env.SMOKETEST_ORIENTATION === "horizontal";
   const config = loadConfig(undefined, {
+    ...(horizontal ? { output: { orientation: "horizontal", width: 1920, height: 1080 } } : {}),
     reveal: { style },
     background: {
       type: backgroundType,

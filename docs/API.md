@@ -264,6 +264,7 @@ Full descriptions are in [`GET /styles`](#get-styles) and the
 | Style | Needs `show.*`? |
 |---|---|
 | `word-pop`, `karaoke`, `focus-word`, `clean-feed`, `lyrics-scroll` | No |
+| `quote-card` | Optional — `episodeLabel` and `title` form its label (e.g. "EPISODE 01 - GROWTH"); hidden if both are empty. |
 | `vertical-show`, `orbit` | Yes — `title` (falls back to filename), `coverImagePath` (falls back to a placeholder circle), `description`, `episodeLabel`; `orbit` also uses `totalChapters` for its dot indicator (config-only, not a request field). |
 
 `vertical-show` and `orbit` render their own waveform/spectrum visualization — set
