@@ -28,18 +28,21 @@ export const KaraokeComposition: React.FC<RenderInputProps> = ({ schedule, confi
         {phrase ? (
           <div
             style={{
+              width: "100%",
+              maxWidth: "100%",
               fontFamily: resolveFontFamily(config.text.font),
               fontSize: config.text.fontSize * 0.6,
               fontWeight: 700,
               textAlign: "center",
               lineHeight: 1.4,
+              overflowWrap: "break-word",
             }}
           >
             {phrase.words.map((w, i) => (
               <span
                 key={`${w.text}-${i}`}
                 style={{
-                  color: i === activeWordIndex ? config.text.highlightColor : config.text.color,
+                  color: i <= activeWordIndex ? config.text.highlightColor : config.text.color,
                   WebkitTextStroke: `${config.text.strokeWidth}px ${config.text.strokeColor}`,
                   paintOrder: "stroke fill",
                   marginRight: "0.35em",

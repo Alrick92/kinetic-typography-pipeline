@@ -83,11 +83,16 @@ hardcoding the list client-side.
   ],
   "backgroundTypes": [
     { "id": "solid", "label": "Solid color", "description": "..." }
+  ],
+  "backgroundColors": [
+    { "id": "white", "label": "White", "hex": "#FFFFFF" },
+    { "id": "blue", "label": "Blue", "hex": "#2563EB" }
   ]
 }
 ```
 `requiresShowMetadata: true` marks styles (`vertical-show`, `orbit`) that read the
-`show.*` fields described [below](#reveal-styles--show-metadata).
+`show.*` fields described [below](#reveal-styles--show-metadata). `backgroundColors`
+lists the presets accepted by the `background` field on `POST /render` (below).
 
 ### `GET /queue`
 
@@ -114,6 +119,7 @@ Use this from any HTTP client that isn't sharing a filesystem with the server.
 | `languageCode` | text | no | UniScribe language code, default `en`. |
 | `outputFileName` | text | no | Output MP4 filename. Defaults to the **original uploaded filename** with its extension swapped to `.mp4` (e.g. `episode.mp3` → `episode.mp4`) — not the randomized name the file is stored under on disk. |
 | `style` | text | no | Shorthand for `reveal.style` (see [styles](#reveal-styles--show-metadata)). |
+| `background` | text | no | Shorthand for `background.color`, from a fixed preset: `white`, `black`, `grey`, `silver`, `blue` (see [`GET /styles`](#get-styles)). Only visible for `solid`-type backgrounds and the `waveform` backdrop; ignored by `gradient`/`video`. An unknown value returns `400`. |
 | `title` | text | no | Shorthand for `show.title`. |
 | `description` | text | no | Shorthand for `show.description`. |
 | `episodeLabel` | text | no | Shorthand for `show.episodeLabel`. |
@@ -144,7 +150,7 @@ container mounting the same `./data` volume — see the
 |---|---|---|---|
 | `audioFilePath` | string | **yes*** | Path to the audio file, resolved on the **server's** filesystem. |
 | `coverImagePath` | string | no | Path to a cover image, resolved on the **server's** filesystem. |
-| everything else | — | no | Same fields as Mode A (`languageCode`, `outputFileName`, `style`, `title`, `description`, `episodeLabel`, `configPath`, `configOverrides`, `mode`), sent as ordinary JSON values (`configOverrides` may be a JSON object here, not a string). |
+| everything else | — | no | Same fields as Mode A (`languageCode`, `outputFileName`, `style`, `background`, `title`, `description`, `episodeLabel`, `configPath`, `configOverrides`, `mode`), sent as ordinary JSON values (`configOverrides` may be a JSON object here, not a string). |
 
 ```bash
 curl -X POST http://localhost:4000/render \

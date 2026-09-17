@@ -11,7 +11,8 @@ import { logger, stageLogger } from "./logger.js";
 import { requireApiKey } from "./api/auth.js";
 import { completeJob, createJob, failJob, jobs, pendingByUniScribeId } from "./api/jobStore.js";
 import { enqueueRenderTask, queueStats } from "./api/jobQueue.js";
-import { BACKGROUND_TYPE_CATALOG, REVEAL_STYLE_CATALOG } from "./api/styleCatalog.js";
+import { BACKGROUND_COLOR_CATALOG, BACKGROUND_TYPE_CATALOG, REVEAL_STYLE_CATALOG } from "./api/styleCatalog.js";
+import { resolveBackgroundColor } from "./backgroundColors.js";
 import { finishPipelineFromTranscription, runPipeline, startTranscription, UniScribeClient } from "./pipeline.js";
 
 const log = stageLogger("api-server");
@@ -38,7 +39,11 @@ app.get("/health", (_req, res) => {
 });
 
 app.get("/styles", (_req, res) => {
-  res.json({ revealStyles: REVEAL_STYLE_CATALOG, backgroundTypes: BACKGROUND_TYPE_CATALOG });
+  res.json({
+    revealStyles: REVEAL_STYLE_CATALOG,
+    backgroundTypes: BACKGROUND_TYPE_CATALOG,
+    backgroundColors: BACKGROUND_COLOR_CATALOG,
+  });
 });
 
 app.get("/queue", (_req, res) => {
@@ -70,6 +75,7 @@ function buildInlineOverrides(body: Record<string, any>): Record<string, unknown
 
   let overrides: Record<string, unknown> = {};
   if (body.style) overrides.reveal = { style: body.style };
+  if (body.background) overrides.background = { color: resolveBackgroundColor(body.background) };
   if (hasShowFields) overrides.show = showFields;
 
   const configOverrides = parseConfigOverrides(body.configOverrides);

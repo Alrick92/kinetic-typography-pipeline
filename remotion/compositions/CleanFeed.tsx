@@ -1,62 +1,109 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderInputProps } from "../props";
 import { Background } from "../backgrounds/Background";
-import { findActiveCueIndex } from "../util/findActiveCue";
+import { findActiveCueIndex, findAnchorCueIndex } from "../util/findActiveCue";
 import { resolveFontFamily } from "../shared/fonts";
 
-// Rather than scrolling the whole transcript (which needs real layout
-// measurement), we render a fixed-size window around the active word and let
-// it visually "flow" as new words enter and old ones leave the window.
-const WINDOW_BEFORE = 12;
-const WINDOW_AFTER = 18;
+// Lines sit in fixed slots (one per transcript phrase) and the whole stack smoothly
+// scrolls by one slot at a time — unlike a sliding per-word window, this never
+// changes what's on screen enough to reflow/re-wrap, so nothing jumps around.
+const WINDOW = 3;
 
 export const CleanFeedComposition: React.FC<RenderInputProps> = ({ schedule, config, audioFileName }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const timeSec = frame / fps;
 
-  if (schedule.style !== "word-pop") {
-    throw new Error("CleanFeedComposition received a non-word-pop schedule");
+  if (schedule.style !== "karaoke") {
+    throw new Error("CleanFeedComposition received a non-karaoke schedule");
   }
 
-  const cues = schedule.cues;
-  const activeIndex = findActiveCueIndex(cues, timeSec);
-  const anchor = activeIndex >= 0 ? activeIndex : 0;
-  const windowStart = Math.max(0, anchor - WINDOW_BEFORE);
-  const windowEnd = Math.min(cues.length, anchor + WINDOW_AFTER);
-  const windowWords = cues.slice(windowStart, windowEnd);
+  const lines = schedule.cues;
+  // Anchored to the most recently *started* line rather than the strictly active
+  // one, so a silence gap between phrases holds the view (and highlight) on the
+  // line that just finished instead of snapping back to line 0 (a strict
+  // "active now" lookup returns none mid-gap, which used to reset the anchor to
+  // 0 — and drop the highlight entirely — on every pause).
+  const anchorIndex = findAnchorCueIndex(lines, timeSec);
+  const anchor = anchorIndex >= 0 ? anchorIndex : 0;
+
+  // Smoothly animates the scroll position from the previous line to the current
+  // one each time the active line advances, instead of jumping instantly.
+  const lineStartFrame = anchorIndex >= 0 ? Math.round(lines[anchorIndex].start * fps) : 0;
+  const settleProgress = spring({ frame: frame - lineStartFrame, fps, config: { damping: 20, stiffness: 120 } });
+  const scrollPosition = anchor - (1 - settleProgress);
+
+  const fontSize = config.text.fontSize * 0.42;
+  const lineHeight = config.text.fontSize * 0.95;
+
+  const windowStart = Math.max(0, anchor - WINDOW);
+  const windowEnd = Math.min(lines.length, anchor + WINDOW + 1);
+  const visibleLines = lines.slice(windowStart, windowEnd);
 
   return (
     <AbsoluteFill>
       <Background config={config.background} audioFileName={audioFileName} />
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "0 10%" }}>
-        <div
-          style={{
-            fontFamily: resolveFontFamily(config.text.font),
-            fontSize: config.text.fontSize * 0.42,
-            fontWeight: 600,
-            textAlign: "center",
-            lineHeight: 1.5,
-          }}
-        >
-          {windowWords.map((w, i) => {
-            const globalIndex = windowStart + i;
-            const isPast = globalIndex < activeIndex;
-            const isActive = globalIndex === activeIndex;
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+        <div style={{ position: "relative", width: "100%", height: 0 }}>
+          {visibleLines.map((line, i) => {
+            const lineIndex = windowStart + i;
+            const isCurrent = anchorIndex >= 0 && lineIndex === anchor;
+            const distance = Math.abs(lineIndex - anchor);
+            const offsetPx = (lineIndex - scrollPosition) * lineHeight;
+            // Once the line's own time window has passed (silence gap before the next
+            // line starts), treat every word as already spoken instead of falling back
+            // to "no active word", which would otherwise dim the whole line back down.
+            const activeWordIndex = isCurrent
+              ? timeSec >= line.end
+                ? line.words.length
+                : findActiveCueIndex(line.words, timeSec)
+              : -1;
+            // The immediate previous/next line gets a clear, distinct opacity of its own
+            // (not just the next step down from "current") so it reads as visible context
+            // during the scroll transition, rather than fading in from near-invisible.
+            const lineOpacity = isCurrent ? 1 : distance === 1 ? 0.55 : Math.max(0.18, 0.4 - distance * 0.08);
+
             return (
-              <span
-                key={`${w.text}-${globalIndex}`}
+              <div
+                key={`${lineIndex}-${line.text}`}
                 style={{
-                  opacity: isActive ? 1 : isPast ? 0.35 : 0.16,
-                  color: isActive ? config.text.highlightColor : config.text.color,
-                  fontWeight: isActive ? 800 : 500,
-                  marginRight: "0.32em",
-                  display: "inline-block",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  transform: `translateY(${offsetPx}px) translateY(-50%)`,
+                  textAlign: "center",
+                  padding: "0 10%",
+                  fontFamily: resolveFontFamily(config.text.font),
+                  fontSize,
+                  fontWeight: isCurrent ? 700 : 500,
+                  color: config.text.color,
+                  lineHeight: 1.4,
+                  opacity: lineOpacity,
                 }}
               >
-                {w.text}
-              </span>
+                {isCurrent
+                  ? line.words.map((w, wi) => {
+                      const isPast = wi < activeWordIndex;
+                      const isActiveWord = wi === activeWordIndex;
+                      return (
+                        <span
+                          key={wi}
+                          style={{
+                            color: isActiveWord ? config.text.highlightColor : config.text.color,
+                            fontWeight: isActiveWord ? 700 : 500,
+                            opacity: isActiveWord ? 1 : isPast ? 0.6 : 0.35,
+                            marginRight: "0.3em",
+                            display: "inline-block",
+                          }}
+                        >
+                          {w.text}
+                        </span>
+                      );
+                    })
+                  : line.text}
+              </div>
             );
           })}
         </div>

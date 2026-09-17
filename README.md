@@ -62,6 +62,7 @@ npm run test:uniscribe
 npm run cli -- render --input ./data/episode.mp3
 npm run cli -- render --input ./data/episode.mp3 --config ./config/karaoke-horizontal.yaml
 npm run cli -- render --input ./data/episode.mp3 --output episode-final.mp4 --language en
+npm run cli -- render --input ./data/episode.mp3 --style karaoke --background blue
 ```
 
 Exit codes are non-zero on any failure, with the failing stage and a human-readable
@@ -113,13 +114,17 @@ code changes needed.
 ### Reveal styles
 
 - `word-pop`: one word centered on screen at a time, replaced as the audio progresses.
-- `karaoke`: full sentence/segment visible, active word rendered in `highlightColor`.
+- `karaoke`: full sentence/segment visible (wraps to fit the frame), the active word and
+  all already-spoken words in that segment rendered in `highlightColor`, upcoming words
+  in the base color.
 - `focus-word`: word-pop, plus faded previous/next word context above and below,
   the active word on a rounded `highlightColor` card, an elapsed/total timer, and a
   bottom progress bar.
-- `clean-feed`: continuous flowing paragraph — a window of words around the current
-  one, spoken word bold and in `highlightColor`, already-spoken words dimmed, upcoming
-  words dimmer still. No scrolling/layout measurement; the window just shifts forward.
+- `clean-feed`: continuous flowing lines — several transcript lines visible at once,
+  each in a fixed slot that smoothly scrolls up by one line at a time (same stable
+  mechanism as `lyrics-scroll`, so nothing reflows/jumps). Within the current line,
+  the active word is bold and in `highlightColor`, already-spoken words in that line
+  are dimmed, upcoming words dimmer still.
 - `lyrics-scroll`: song-lyrics style — one line (transcript phrase) per line, vertically
   centered; the current line is bold/highlighted, previous lines sit above (dimmed,
   already scrolled past), upcoming lines below. Smoothly animates to the next line's
@@ -157,7 +162,10 @@ instead of dedicated fields.
 
 ### Background types
 
-- `solid` — flat `background.color`.
+- `solid` — flat `background.color`. Set it with `--background <name>` (CLI) or the
+  `background` field (webhook/n8n) from a fixed preset — `white`, `black`, `grey`,
+  `silver`, `blue` — instead of a raw hex value; also affects the `waveform` type's
+  backdrop (both read `background.color`). Ignored by `gradient`/`video`.
 - `gradient` — linear gradient between `background.gradient.from`/`to` at `angle` degrees.
 - `video` — looping video or static image; set `background.mediaPath` to a file path
   (it's copied into `remotion/public/backgrounds/` automatically at render time).

@@ -1,6 +1,7 @@
 import React from "react";
 import { staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { useAudioData, visualizeAudio } from "@remotion/media-utils";
+import { toDisplayBands } from "../util/audioBands";
 
 const NUM_SPIKES = 64; // visualizeAudio requires a power of two
 
@@ -17,7 +18,7 @@ export const RadialSpectrum: React.FC<{
 
   if (!audioData) return null;
 
-  const frequencies = visualizeAudio({ fps, frame, audioData, numberOfSamples: NUM_SPIKES });
+  const frequencies = toDisplayBands(visualizeAudio({ fps, frame, audioData, numberOfSamples: NUM_SPIKES }), NUM_SPIKES);
   const center = size / 2;
 
   return (

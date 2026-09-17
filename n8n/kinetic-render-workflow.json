@@ -36,6 +36,7 @@
                   { "option": "karaoke" },
                   { "option": "focus-word" },
                   { "option": "clean-feed" },
+                  { "option": "lyrics-scroll" },
                   { "option": "vertical-show" },
                   { "option": "orbit" }
                 ]
@@ -51,6 +52,21 @@
                   { "option": "gradient" },
                   { "option": "video" },
                   { "option": "waveform" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Background Color",
+              "fieldType": "dropdown",
+              "requiredField": false,
+              "placeholder": "Applies to solid backgrounds (and the waveform backdrop); ignored for gradient/video. Leave blank to keep the config default",
+              "fieldOptions": {
+                "values": [
+                  { "option": "White" },
+                  { "option": "Black" },
+                  { "option": "Grey" },
+                  { "option": "Silver" },
+                  { "option": "Blue" }
                 ]
               }
             },
@@ -112,6 +128,7 @@
           "assignments": [
             { "id": "map-1", "name": "style", "type": "string", "value": "={{ $json['Style'] }}" },
             { "id": "map-2", "name": "backgroundType", "type": "string", "value": "={{ $json['Background Type'] }}" },
+            { "id": "map-2b", "name": "background", "type": "string", "value": "={{ ($json['Background Color'] || '').toLowerCase() }}" },
             { "id": "map-3", "name": "languageCode", "type": "string", "value": "={{ $json['Language Code'] }}" },
             { "id": "map-4", "name": "title", "type": "string", "value": "={{ $json['Title'] || '' }}" },
             { "id": "map-5", "name": "description", "type": "string", "value": "={{ $json['Description'] || '' }}" },
@@ -161,6 +178,7 @@
         "bodyParameters": {
           "parameters": [
             { "parameterType": "formData", "name": "style", "value": "={{ $json.style }}" },
+            { "parameterType": "formData", "name": "background", "value": "={{ $json.background }}" },
             { "parameterType": "formData", "name": "title", "value": "={{ $json.title }}" },
             { "parameterType": "formData", "name": "description", "value": "={{ $json.description }}" },
             { "parameterType": "formData", "name": "episodeLabel", "value": "={{ $json.episodeLabel }}" },

@@ -1,9 +1,11 @@
 import React from "react";
 import { AbsoluteFill, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { useAudioData, visualizeAudio, type AudioData } from "@remotion/media-utils";
+import { toDisplayBands } from "../util/audioBands";
 
 const NUM_BARS = 48;
-// visualizeAudio requires a power-of-two sample count; we take the first NUM_BARS of it.
+// visualizeAudio requires a power-of-two sample count; toDisplayBands groups its
+// full output (spanning bass through treble) down into NUM_BARS display bars.
 const NUM_SAMPLES = 64;
 
 export const WaveformBackground: React.FC<{ audioFileName: string; color: string; backdrop: string }> = ({
@@ -33,7 +35,7 @@ const Bars: React.FC<{
   color: string;
 }> = ({ audioData, frame, fps, width, height, color }) => {
   const frequencies = visualizeAudio({ fps, frame, audioData, numberOfSamples: NUM_SAMPLES });
-  const bars = frequencies.slice(0, NUM_BARS);
+  const bars = toDisplayBands(frequencies, NUM_BARS);
   const barWidth = width / NUM_BARS;
   const maxBarHeight = height * 0.25;
 

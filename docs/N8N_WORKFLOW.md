@@ -30,10 +30,12 @@ Kinetic Render Form -> Read Form Fields -> Config -> Upload Audio (POST /render)
 
 - **Kinetic Render Form** — an n8n **Form Trigger** (not a plain JSON webhook).
   Fields: **Audio File** (upload), and real dropdowns for **Style**,
-  **Background Type**, and **Language Code**, plus optional text fields **Title**,
-  **Description**, **Episode Label** (only read by `vertical-show`/`orbit`).
-  `responseMode: responseNode` holds the page open until a "Respond to Webhook"
-  node runs — that's what makes "submit and wait for the video" work as one request.
+  **Background Type**, **Background Color** (optional — White/Black/Grey/Silver/Blue;
+  only applies to `solid`-type backgrounds and the `waveform` backdrop), and
+  **Language Code**, plus optional text fields **Title**, **Description**,
+  **Episode Label** (only read by `vertical-show`/`orbit`). `responseMode:
+  responseNode` holds the page open until a "Respond to Webhook" node runs —
+  that's what makes "submit and wait for the video" work as one request.
 - **Read Form Fields** — maps the form's labeled answers (`$json['Style']`, etc.)
   to the plain field names the rest of the workflow uses.
 - **Config** — infrastructure settings only: `apiBaseUrl`, `apiKey`, the poll
@@ -43,8 +45,11 @@ Kinetic Render Form -> Read Form Fields -> Config -> Upload Audio (POST /render)
   multipart data (the binary property name is resolved dynamically via
   `Object.keys($binary)[0]`, so it doesn't matter what n8n internally calls the
   form's uploaded file), plus the chosen style/background/etc. as form fields.
-  `backgroundType` goes through as a `configOverrides` JSON blob since the API's
-  shorthand fields don't include it directly. Returns `{ jobId, statusUrl, downloadUrl }`.
+  `background` (the color preset) is sent as the API's own `background` shorthand
+  field directly; `backgroundType` goes through as a `configOverrides` JSON blob
+  since the API's shorthand fields don't include it directly. Left blank, an empty
+  `background` value is ignored server-side rather than erroring. Returns
+  `{ jobId, statusUrl, downloadUrl }`.
 - **Wait Before Check** → **Check Job Status** — polls `GET {apiBaseUrl}{statusUrl}`
   every `pollSeconds` (default 15s).
 - **Job Status Router** — a Switch node with three outcomes:
@@ -71,15 +76,16 @@ Kinetic Render Form -> Read Form Fields -> Config -> Upload Audio (POST /render)
 ## Using it
 
 Open the form URL in a browser: upload an audio file, pick **Style**,
-**Background Type**, and **Language Code** from the dropdowns, optionally fill in
-**Title**/**Description**/**Episode Label**, and submit. The page won't respond
-until the video is fully rendered — expect anywhere from under a minute (short
-clips) to several minutes (long files, cold Chromium start) — then the MP4 downloads.
+**Background Type**, **Background Color** (optional), and **Language Code** from
+the dropdowns, optionally fill in **Title**/**Description**/**Episode Label**, and
+submit. The page won't respond until the video is fully rendered — expect anywhere
+from under a minute (short clips) to several minutes (long files, cold Chromium
+start) — then the MP4 downloads.
 
 n8n Form Trigger endpoints also accept a plain programmatic `multipart/form-data`
 POST (same field names as the form labels: `Audio File`, `Style`, `Background Type`,
-`Language Code`, `Title`, `Description`, `Episode Label`), if you want to call this
-from a script instead of a browser.
+`Background Color`, `Language Code`, `Title`, `Description`, `Episode Label`), if you
+want to call this from a script instead of a browser.
 
 ## Timeouts you may need to raise
 

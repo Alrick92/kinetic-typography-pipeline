@@ -7,6 +7,7 @@ import { loadConfig } from "./config.js";
 import { runPipeline } from "./pipeline.js";
 import { PipelineError } from "./errors.js";
 import { logger } from "./logger.js";
+import { resolveBackgroundColor } from "./backgroundColors.js";
 
 const program = new Command();
 
@@ -24,6 +25,7 @@ program
   .option("-o, --output <file>", "output MP4 filename (relative to output.directory)")
   .option("-w, --webhook-url <url>", "UniScribe webhook URL for completion notification")
   .option("--style <style>", "reveal style override, e.g. word-pop, karaoke, focus-word, clean-feed, vertical-show, orbit")
+  .option("--background <name>", "background color preset: white, black, grey, silver, blue")
   .option("--title <text>", "video title (used by vertical-show / orbit styles)")
   .option("--cover-image <path>", "path to a cover/avatar image (used by vertical-show / orbit styles)")
   .option("--description <text>", "short description line (used by vertical-show / orbit styles)")
@@ -42,6 +44,7 @@ program
       const hasShowOverrides = Object.values(showOverrides).some((v) => v !== undefined);
       const inlineOverrides = {
         ...(options.style ? { reveal: { style: options.style } } : {}),
+        ...(options.background ? { background: { color: resolveBackgroundColor(options.background) } } : {}),
         ...(hasShowOverrides ? { show: showOverrides } : {}),
       };
       const config = loadConfig(options.config, Object.keys(inlineOverrides).length > 0 ? inlineOverrides : undefined);

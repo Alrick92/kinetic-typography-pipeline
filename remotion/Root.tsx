@@ -26,7 +26,7 @@ const COMPOSITIONS: { id: string; component: React.FC<RenderInputProps>; schedul
   { id: "WordPop", component: WordPopComposition },
   { id: "Karaoke", component: KaraokeComposition, schedule: KARAOKE_SCHEDULE },
   { id: "FocusWord", component: FocusWordComposition },
-  { id: "CleanFeed", component: CleanFeedComposition },
+  { id: "CleanFeed", component: CleanFeedComposition, schedule: KARAOKE_SCHEDULE },
   { id: "LyricsScroll", component: LyricsScrollComposition, schedule: KARAOKE_SCHEDULE },
   { id: "VerticalShow", component: VerticalShowComposition },
   { id: "Orbit", component: OrbitComposition },

@@ -1,3 +1,5 @@
+import { BACKGROUND_COLOR_PRESETS } from "../backgroundColors.js";
+
 /** Static metadata describing each reveal style, for API consumers building a style picker. */
 export const REVEAL_STYLE_CATALOG = [
   {
@@ -54,3 +56,10 @@ export const BACKGROUND_TYPE_CATALOG = [
     description: "Animated audio-amplitude bars. Do not combine with vertical-show/orbit, which draw their own.",
   },
 ] as const;
+
+/** Named presets for the `background` convenience field (sets background.color to a known-good hex value). */
+export const BACKGROUND_COLOR_CATALOG = Object.entries(BACKGROUND_COLOR_PRESETS).map(([id, hex]) => ({
+  id,
+  label: id[0].toUpperCase() + id.slice(1),
+  hex,
+}));

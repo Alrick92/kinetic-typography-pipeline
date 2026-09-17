@@ -1,6 +1,7 @@
 import React from "react";
 import { staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { useAudioData, visualizeAudio } from "@remotion/media-utils";
+import { toDisplayBands } from "../util/audioBands";
 
 const NUM_BARS = 40;
 const NUM_SAMPLES = 64; // visualizeAudio requires a power of two
@@ -17,7 +18,7 @@ export const MiniWaveform: React.FC<{ audioFileName: string; color: string; widt
 
   if (!audioData) return <div style={{ width, height }} />;
 
-  const frequencies = visualizeAudio({ fps, frame, audioData, numberOfSamples: NUM_SAMPLES }).slice(0, NUM_BARS);
+  const frequencies = toDisplayBands(visualizeAudio({ fps, frame, audioData, numberOfSamples: NUM_SAMPLES }), NUM_BARS);
   const barWidth = width / NUM_BARS;
 
   return (
