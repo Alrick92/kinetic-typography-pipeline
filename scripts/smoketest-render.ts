@@ -10,6 +10,8 @@
  *   background-type: solid | gradient | waveform
  *   background-color: white | black | grey | silver | blue, or a hex value like #1E88E5
  *   SMOKETEST_FONT_COLOR / SMOKETEST_HIGHLIGHT_COLOR: hex text/active-word colors
+ *   SMOKETEST_THEME: color theme (midnight-lime | electric-blue | cream-coral | lime-violet);
+ *     unset uses the style's default theme
  *   SMOKETEST_COVER_IMAGE: path to a cover image (shown by vertical-show / orbit)
  */
 import "dotenv/config";
@@ -64,6 +66,7 @@ async function main() {
   const config = loadConfig(undefined, {
     ...(horizontal ? { output: { orientation: "horizontal", width: 1920, height: 1080 } } : {}),
     reveal: { style },
+    ...(process.env.SMOKETEST_THEME ? { theme: process.env.SMOKETEST_THEME } : {}),
     background: {
       type: backgroundType,
       ...(backgroundColorName ? { color: resolveBackgroundColor(backgroundColorName) } : {}),
@@ -92,7 +95,7 @@ async function main() {
     schedule,
     config,
     durationSec: transcript.durationSec ?? 0,
-    outputFileName: `smoketest-${style}-${backgroundType}.mp4`,
+    outputFileName: `smoketest-${style}-${config.theme}-${backgroundType}.mp4`,
   });
 
   console.log(`Rendered: ${outputPath}`);

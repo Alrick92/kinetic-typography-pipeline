@@ -12,6 +12,7 @@ export const defaultInputProps: RenderInputProps = {
   schedule: { style: "word-pop", cues: [] },
   config: {
     output: { orientation: "vertical", width: 1080, height: 1920, fps: 30, directory: "./output" },
+    theme: "midnight-lime",
     reveal: { style: "focus-word" },
     text: {
       font: "Space Grotesk",

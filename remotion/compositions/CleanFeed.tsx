@@ -33,8 +33,8 @@ export const CleanFeedComposition: React.FC<RenderInputProps> = ({ schedule, con
   const settleProgress = spring({ frame: frame - lineStartFrame, fps, config: { damping: 20, stiffness: 120 } });
   const scrollPosition = anchor - (1 - settleProgress);
 
-  const fontSize = config.text.fontSize * 0.42;
-  const lineHeight = config.text.fontSize * 0.95;
+  const fontSize = config.text.fontSize * 0.5;
+  const lineHeight = config.text.fontSize * 1.05;
 
   const windowStart = Math.max(0, anchor - WINDOW);
   const windowEnd = Math.min(lines.length, anchor + WINDOW + 1);

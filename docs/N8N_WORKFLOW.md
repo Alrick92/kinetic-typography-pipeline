@@ -39,17 +39,22 @@ Kinetic Render Form -> Read Form Fields -> Config -> Has Cover Image?
   - **Audio File** (upload, required)
   - **Style** (dropdown, required) — exactly the four styles: `focus-word`,
     `clean-feed`, `vertical-show`, `orbit`
+  - **Color Theme** (dropdown, required) — `style default` (each style's own theme:
+    focus-word → midnight-lime, clean-feed → cream-coral, vertical-show →
+    electric-blue, orbit → lime-violet), or pick `midnight-lime`, `electric-blue`,
+    `cream-coral`, `lime-violet` for any style
   - **Cover Image** (upload, optional — `.jpg`/`.png`/`.webp`) — the circular photo
     shown by `vertical-show`/`orbit`; without one they show a placeholder circle in
     the highlight color
-  - **Background Color** (optional) — a preset name (White/Black/Grey/Silver/Blue) or
-    any hex like `#1E88E5`
-  - **Font Color** / **Highlight Color** (optional) — hex text and active-word colors
+  - **Background Color** (optional) — overrides the theme's background: a preset name
+    (White/Black/Grey/Silver/Blue) or any hex like `#1E88E5`
+  - **Font Color** / **Highlight Color** (optional) — hex overrides for the theme's text
+    and current/bold-word colors
   - **Title**, **Description**, **Episode Label** (optional, only read by
     `vertical-show`/`orbit`)
   - **Language Code** (dropdown, required) — the transcription language
 
-  Blank optional fields keep the config default. `responseMode: responseNode` holds
+  Blank color fields keep the theme's color. `responseMode: responseNode` holds
   the page open until a "Respond to Webhook" node runs — that's what makes "submit
   and wait for the video" work as one request.
 - **Read Form Fields** — maps the form's labeled answers (`$json['Style']`, etc.)
@@ -94,15 +99,15 @@ Kinetic Render Form -> Read Form Fields -> Config -> Has Cover Image?
 
 ## Using it
 
-Open the form URL in a browser: upload an audio file, pick a **Style** and
-**Language Code**, optionally upload a **Cover Image** and fill in
+Open the form URL in a browser: upload an audio file, pick a **Style**, a
+**Color Theme** and a **Language Code**, optionally upload a **Cover Image** and fill in
 **Background Color**/**Font Color**/**Highlight Color** and
 **Title**/**Description**/**Episode Label**, and submit. The page won't respond until the video is fully rendered — expect anywhere
 from under a minute (short clips) to several minutes (long files, cold Chromium
 start) — then the MP4 downloads.
 
 n8n Form Trigger endpoints also accept a plain programmatic `multipart/form-data`
-POST (same field names as the form labels: `Audio File`, `Style`, `Cover Image`,
+POST (same field names as the form labels: `Audio File`, `Style`, `Color Theme`, `Cover Image`,
 `Background Color`, `Font Color`, `Highlight Color`, `Title`, `Description`,
 `Episode Label`, `Language Code`), if you
 want to call this from a script instead of a browser.

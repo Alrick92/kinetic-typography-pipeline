@@ -4,6 +4,7 @@ import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import { ConfigError } from "./errors.js";
 import type { PipelineConfig } from "./types.js";
+import { COLOR_THEMES, STYLE_DEFAULT_THEME, THEME_NAMES } from "./themes.js";
 
 const configSchema = z.object({
   output: z.object({
@@ -13,6 +14,7 @@ const configSchema = z.object({
     fps: z.number().int().positive(),
     directory: z.string().min(1),
   }),
+  theme: z.enum(THEME_NAMES as [string, ...string[]]).nullable(),
   reveal: z.object({
     style: z.enum(["focus-word", "clean-feed", "vertical-show", "orbit"]),
   }),
@@ -102,5 +104,35 @@ export function loadConfig(overridePath?: string, inlineOverrides?: Record<strin
   if (!parsed.success) {
     throw new ConfigError(parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "));
   }
-  return parsed.data;
+  return applyTheme(parsed.data as PipelineConfig, overrideSources);
+}
+
+/**
+ * Fills background/text/highlight colors from the chosen theme (or, with none chosen,
+ * the style's default theme). A color set explicitly by any override — a config file,
+ * configOverrides, or the fontColor/background/... request fields — always wins over
+ * the theme, so a theme can be picked and then individually adjusted.
+ */
+function applyTheme(config: PipelineConfig, overrideSources: Record<string, any>[]): PipelineConfig {
+  const themeName = config.theme ?? STYLE_DEFAULT_THEME[config.reveal.style];
+  const theme = COLOR_THEMES[themeName as keyof typeof COLOR_THEMES];
+  const isSet = (get: (s: any) => unknown) => overrideSources.some((s) => get(s) !== undefined);
+
+  return {
+    ...config,
+    theme: themeName,
+    background: {
+      ...config.background,
+      color: isSet((s) => s?.background?.color) ? config.background.color : theme.background,
+      waveform: {
+        ...config.background.waveform,
+        color: isSet((s) => s?.background?.waveform?.color) ? config.background.waveform.color : theme.highlight,
+      },
+    },
+    text: {
+      ...config.text,
+      color: isSet((s) => s?.text?.color) ? config.text.color : theme.text,
+      highlightColor: isSet((s) => s?.text?.highlightColor) ? config.text.highlightColor : theme.highlight,
+    },
+  };
 }

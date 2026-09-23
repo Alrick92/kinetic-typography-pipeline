@@ -6,6 +6,7 @@ import { PopWord } from "../shared/PopWord";
 import { AvatarImage } from "../shared/AvatarImage";
 import { MiniWaveform } from "../shared/MiniWaveform";
 import { resolveFontFamily } from "../shared/fonts";
+import { fitFontSize } from "../util/fitFontSize";
 
 export const VerticalShowComposition: React.FC<RenderInputProps> = ({ schedule, config, audioFileName }) => {
   const frame = useCurrentFrame();
@@ -56,7 +57,14 @@ export const VerticalShowComposition: React.FC<RenderInputProps> = ({ schedule, 
         ) : null}
       </AbsoluteFill>
       <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: width * 0.18 }}>
-        <PopWord cue={cue} frame={frame} fps={fps} text={config.text} />
+        <PopWord
+          cue={cue}
+          frame={frame}
+          fps={fps}
+          text={config.text}
+          fontSize={cue ? fitFontSize(cue.text, config.text.fontSize * 1.3, width * 0.85) : undefined}
+          textColor={config.text.highlightColor}
+        />
       </AbsoluteFill>
     </AbsoluteFill>
   );

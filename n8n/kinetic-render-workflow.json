@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Setup\n1. Open **Config** and set `apiBaseUrl` to where the Kinetic Typography API is reachable from n8n (e.g. `http://kinetic-typography:4000` on the same Docker network, or `http://localhost:4000`).\n2. If the API has `API_KEY` set, put the same value in `apiKey`.\n3. Activate this workflow, open the **Kinetic Render Form** node, and copy its Production URL \u2014 open that URL in a browser to use the form.\n\n## What it does\nA person opens the form, uploads an audio file (and optionally a cover image), picks\none of the four styles, and optionally sets background/font/highlight colors. The page doesn't respond until the video is fully rendered\n(transcription + render can take minutes) \u2014 the finished MP4 downloads directly.\nOutput filename matches the upload (`episode.mp3` \u2192 `episode.mp4`) automatically.\n\nSee docs/N8N_WORKFLOW.md for timeout settings you may need to raise (n8n, and any\nreverse proxy in front of it) and for calling this programmatically instead of via browser.",
+        "content": "## Setup\n1. Open **Config** and set `apiBaseUrl` to where the Kinetic Typography API is reachable from n8n (e.g. `http://kinetic-typography:4000` on the same Docker network, or `http://localhost:4000`).\n2. If the API has `API_KEY` set, put the same value in `apiKey`.\n3. Activate this workflow, open the **Kinetic Render Form** node, and copy its Production URL \u2014 open that URL in a browser to use the form.\n\n## What it does\nA person opens the form, uploads an audio file (and optionally a cover image), picks\none of the four styles and a color theme, and optionally overrides individual colors. The page doesn't respond until the video is fully rendered\n(transcription + render can take minutes) \u2014 the finished MP4 downloads directly.\nOutput filename matches the upload (`episode.mp3` \u2192 `episode.mp4`) automatically.\n\nSee docs/N8N_WORKFLOW.md for timeout settings you may need to raise (n8n, and any\nreverse proxy in front of it) and for calling this programmatically instead of via browser.",
         "height": 400,
         "width": 440
       },
@@ -19,7 +19,7 @@
     {
       "parameters": {
         "formTitle": "Kinetic Typography Render",
-        "formDescription": "Upload an audio file, pick a style, and optionally set the colors and a cover image.",
+        "formDescription": "Upload an audio file, pick a style and a color theme, and optionally adjust individual colors and add a cover image.",
         "formFields": {
           "values": [
             {
@@ -51,6 +51,30 @@
               }
             },
             {
+              "fieldLabel": "Color Theme",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "style default"
+                  },
+                  {
+                    "option": "midnight-lime"
+                  },
+                  {
+                    "option": "electric-blue"
+                  },
+                  {
+                    "option": "cream-coral"
+                  },
+                  {
+                    "option": "lime-violet"
+                  }
+                ]
+              }
+            },
+            {
               "fieldLabel": "Cover Image",
               "fieldType": "file",
               "requiredField": false,
@@ -61,19 +85,19 @@
               "fieldLabel": "Background Color",
               "fieldType": "text",
               "requiredField": false,
-              "placeholder": "Optional: a preset (White, Black, Grey, Silver, Blue) or any hex like #1E88E5. Leave blank to keep the config default"
+              "placeholder": "Optional: overrides the theme's background. A preset (White, Black, Grey, Silver, Blue) or any hex like #1E88E5"
             },
             {
               "fieldLabel": "Font Color",
               "fieldType": "text",
               "requiredField": false,
-              "placeholder": "Optional hex text color, e.g. #FFFFFF. Leave blank to keep the config default"
+              "placeholder": "Optional: overrides the theme's text color, hex like #FFFFFF"
             },
             {
               "fieldLabel": "Highlight Color",
               "fieldType": "text",
               "requiredField": false,
-              "placeholder": "Optional hex active-word/highlight color, e.g. #FFD400. Leave blank to keep the config default"
+              "placeholder": "Optional: overrides the theme's bold/current-word color, hex like #FFD400"
             },
             {
               "fieldLabel": "Title",
@@ -165,6 +189,12 @@
               "name": "style",
               "type": "string",
               "value": "={{ $json['Style'] }}"
+            },
+            {
+              "id": "map-1b",
+              "name": "theme",
+              "type": "string",
+              "value": "={{ $json['Color Theme'] === 'style default' ? '' : ($json['Color Theme'] || '') }}"
             },
             {
               "id": "map-2b",
@@ -285,6 +315,11 @@
               "parameterType": "formData",
               "name": "style",
               "value": "={{ $json.style }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "theme",
+              "value": "={{ $json.theme }}"
             },
             {
               "parameterType": "formData",
@@ -579,6 +614,11 @@
               "parameterType": "formData",
               "name": "style",
               "value": "={{ $json.style }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "theme",
+              "value": "={{ $json.theme }}"
             },
             {
               "parameterType": "formData",

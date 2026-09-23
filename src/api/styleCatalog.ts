@@ -1,4 +1,5 @@
 import { BACKGROUND_COLOR_PRESETS } from "../backgroundColors.js";
+import { COLOR_THEMES, STYLE_DEFAULT_THEME } from "../themes.js";
 
 /** Static metadata describing each reveal style, for API consumers building a style picker. */
 export const REVEAL_STYLE_CATALOG = [
@@ -7,26 +8,39 @@ export const REVEAL_STYLE_CATALOG = [
     label: "Focus Word",
     description: "One word at a time on a highlight card, with faded prev/next word context, elapsed timer, and a progress bar.",
     requiresShowMetadata: false,
+    defaultTheme: STYLE_DEFAULT_THEME["focus-word"],
   },
   {
     id: "clean-feed",
     label: "Clean Feed",
     description: "Continuous flowing paragraph; spoken word bold, past text faded, future text dimmer.",
     requiresShowMetadata: false,
+    defaultTheme: STYLE_DEFAULT_THEME["clean-feed"],
   },
   {
     id: "vertical-show",
     label: "Vertical Show",
     description: "Cover photo + title + audio waveform card, with one-word captions in the lower third.",
     requiresShowMetadata: true,
+    defaultTheme: STYLE_DEFAULT_THEME["vertical-show"],
   },
   {
     id: "orbit",
     label: "Orbit",
     description: "Circular avatar + radial audio spectrum + episode dots, captions in the lower third.",
     requiresShowMetadata: true,
+    defaultTheme: STYLE_DEFAULT_THEME["orbit"],
   },
 ] as const;
+
+/** Named color themes for the `theme` field; each style's `defaultTheme` applies when none is chosen. */
+export const THEME_CATALOG = Object.entries(COLOR_THEMES).map(([id, t]) => ({
+  id,
+  label: t.label,
+  background: t.background,
+  text: t.text,
+  highlight: t.highlight,
+}));
 
 export const BACKGROUND_TYPE_CATALOG = [
   { id: "solid", label: "Solid color", description: "Flat background.color." },

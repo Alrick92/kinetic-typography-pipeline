@@ -11,8 +11,9 @@ import { logger, stageLogger } from "./logger.js";
 import { requireApiKey } from "./api/auth.js";
 import { completeJob, createJob, failJob, jobs, pendingByUniScribeId } from "./api/jobStore.js";
 import { enqueueRenderTask, queueStats } from "./api/jobQueue.js";
-import { BACKGROUND_COLOR_CATALOG, BACKGROUND_TYPE_CATALOG, REVEAL_STYLE_CATALOG } from "./api/styleCatalog.js";
+import { BACKGROUND_COLOR_CATALOG, BACKGROUND_TYPE_CATALOG, REVEAL_STYLE_CATALOG, THEME_CATALOG } from "./api/styleCatalog.js";
 import { isHexColor, resolveBackgroundColor } from "./backgroundColors.js";
+import { isThemeName, THEME_NAMES } from "./themes.js";
 import { finishPipelineFromTranscription, runPipeline, startTranscription, UniScribeClient } from "./pipeline.js";
 
 const log = stageLogger("api-server");
@@ -41,6 +42,7 @@ app.get("/health", (_req, res) => {
 app.get("/styles", (_req, res) => {
   res.json({
     revealStyles: REVEAL_STYLE_CATALOG,
+    themes: THEME_CATALOG,
     backgroundTypes: BACKGROUND_TYPE_CATALOG,
     backgroundColors: BACKGROUND_COLOR_CATALOG,
   });
@@ -75,6 +77,10 @@ function buildInlineOverrides(body: Record<string, any>): Record<string, unknown
 
   let overrides: Record<string, unknown> = {};
   if (body.style) overrides.reveal = { style: body.style };
+  if (body.theme) {
+    if (!isThemeName(body.theme)) throw new Error(`Unknown theme "${body.theme}". Use one of: ${THEME_NAMES.join(", ")}`);
+    overrides.theme = body.theme;
+  }
   if (body.background) overrides.background = { color: resolveBackgroundColor(body.background) };
   if (body.fontColor) {
     if (!isHexColor(body.fontColor)) throw new Error(`fontColor must be a hex color like #FFFFFF (got "${body.fontColor}")`);

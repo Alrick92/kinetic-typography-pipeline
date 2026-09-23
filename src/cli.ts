@@ -8,6 +8,7 @@ import { runPipeline } from "./pipeline.js";
 import { PipelineError } from "./errors.js";
 import { logger } from "./logger.js";
 import { isHexColor, resolveBackgroundColor } from "./backgroundColors.js";
+import { isThemeName, THEME_NAMES } from "./themes.js";
 
 const program = new Command();
 
@@ -25,6 +26,7 @@ program
   .option("-o, --output <file>", "output MP4 filename (relative to output.directory)")
   .option("-w, --webhook-url <url>", "UniScribe webhook URL for completion notification")
   .option("--style <style>", "reveal style override: focus-word, clean-feed, vertical-show, orbit")
+  .option("--theme <name>", `color theme: ${THEME_NAMES.join(", ")} (default: the style's own theme)`)
   .option("--background <color>", "background color: a preset (white, black, grey, silver, blue) or a hex value like #1E88E5")
   .option("--font-color <color>", "text color (hex, e.g. #FFFFFF)")
   .option("--highlight-color <color>", "highlight/active-word color (hex, e.g. #FFD400)")
@@ -44,6 +46,9 @@ program
         episodeLabel: options.episodeLabel,
       };
       const hasShowOverrides = Object.values(showOverrides).some((v) => v !== undefined);
+      if (options.theme && !isThemeName(options.theme)) {
+        throw new PipelineError("config", `--theme must be one of: ${THEME_NAMES.join(", ")} (got "${options.theme}")`, 9);
+      }
       if (options.fontColor && !isHexColor(options.fontColor)) {
         throw new PipelineError("config", `--font-color must be a hex color like #FFFFFF (got "${options.fontColor}")`, 9);
       }
@@ -52,6 +57,7 @@ program
       }
       const inlineOverrides = {
         ...(options.style ? { reveal: { style: options.style } } : {}),
+        ...(options.theme ? { theme: options.theme } : {}),
         ...(options.background ? { background: { color: resolveBackgroundColor(options.background) } } : {}),
         ...(hasShowOverrides ? { show: showOverrides } : {}),
         ...(options.fontColor || options.highlightColor

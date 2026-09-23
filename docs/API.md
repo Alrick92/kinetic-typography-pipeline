@@ -78,8 +78,12 @@ hardcoding the list client-side.
 ```json
 {
   "revealStyles": [
-    { "id": "focus-word", "label": "Focus Word", "description": "...", "requiresShowMetadata": false },
-    { "id": "orbit", "label": "Orbit", "description": "...", "requiresShowMetadata": true }
+    { "id": "focus-word", "label": "Focus Word", "description": "...", "requiresShowMetadata": false, "defaultTheme": "midnight-lime" },
+    { "id": "orbit", "label": "Orbit", "description": "...", "requiresShowMetadata": true, "defaultTheme": "lime-violet" }
+  ],
+  "themes": [
+    { "id": "midnight-lime", "label": "Midnight Lime", "background": "#0E0E16", "text": "#F5F5F7", "highlight": "#C6FF34" },
+    { "id": "lime-violet", "label": "Lime & Violet", "background": "#C6FF34", "text": "#111111", "highlight": "#6A2BFF" }
   ],
   "backgroundTypes": [
     { "id": "solid", "label": "Solid color", "description": "..." }
@@ -91,7 +95,10 @@ hardcoding the list client-side.
 }
 ```
 `requiresShowMetadata: true` marks styles (`vertical-show`, `orbit`) that read the
-`show.*` fields described [below](#reveal-styles--show-metadata). `backgroundColors`
+`show.*` fields described [below](#reveal-styles--show-metadata). `defaultTheme` is the
+color theme a style uses when the request doesn't pick one; `themes` lists every theme
+accepted by the `theme` field, with its colors (for prefilling a color picker).
+`backgroundColors`
 lists the presets accepted by the `background` field on `POST /render` (below).
 
 ### `GET /queue`
@@ -119,9 +126,10 @@ Use this from any HTTP client that isn't sharing a filesystem with the server.
 | `languageCode` | text | no | UniScribe language code, default `en`. |
 | `outputFileName` | text | no | Output MP4 filename. Defaults to the **original uploaded filename** with its extension swapped to `.mp4` (e.g. `episode.mp3` → `episode.mp4`) — not the randomized name the file is stored under on disk. |
 | `style` | text | no | Shorthand for `reveal.style`: `focus-word`, `clean-feed`, `vertical-show` or `orbit` (see [styles](#reveal-styles--show-metadata)); anything else is a `400`. |
+| `theme` | text | no | Color theme: `midnight-lime`, `electric-blue`, `cream-coral` or `lime-violet` (see [`GET /styles`](#get-styles)). Empty or omitted uses the style's default theme; anything else is a `400`. `background` / `fontColor` / `highlightColor` below each override one of its colors. |
 | `background` | text | no | Shorthand for `background.color` — either a preset (`white`, `black`, `grey`, `silver`, `blue`, see [`GET /styles`](#get-styles)) or any hex value like `#1E88E5`. Only visible for `solid`-type backgrounds and the `waveform` backdrop; ignored by `gradient`/`video`. An unknown value returns `400`. |
-| `fontColor` | text | no | Shorthand for `text.color` (hex, e.g. `#FFFFFF`). |
-| `highlightColor` | text | no | Shorthand for `text.highlightColor` (hex, e.g. `#FFD400`). |
+| `fontColor` | text | no | Shorthand for `text.color` (hex, e.g. `#FFFFFF`); overrides the theme's text color. |
+| `highlightColor` | text | no | Shorthand for `text.highlightColor` (hex, e.g. `#FFD400`) — the current/bold word color; overrides the theme's. |
 | `title` | text | no | Shorthand for `show.title`. |
 | `description` | text | no | Shorthand for `show.description`. |
 | `episodeLabel` | text | no | Shorthand for `show.episodeLabel`. |
@@ -152,7 +160,7 @@ container mounting the same `./data` volume — see the
 |---|---|---|---|
 | `audioFilePath` | string | **yes*** | Path to the audio file, resolved on the **server's** filesystem. |
 | `coverImagePath` | string | no | Path to a cover image, resolved on the **server's** filesystem. |
-| everything else | — | no | Same fields as Mode A (`languageCode`, `outputFileName`, `style`, `background`, `title`, `description`, `episodeLabel`, `configPath`, `configOverrides`, `mode`), sent as ordinary JSON values (`configOverrides` may be a JSON object here, not a string). |
+| everything else | — | no | Same fields as Mode A (`languageCode`, `outputFileName`, `style`, `theme`, `background`, `title`, `description`, `episodeLabel`, `configPath`, `configOverrides`, `mode`), sent as ordinary JSON values (`configOverrides` may be a JSON object here, not a string). |
 
 ```bash
 curl -X POST http://localhost:4000/render \

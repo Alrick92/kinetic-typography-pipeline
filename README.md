@@ -65,12 +65,15 @@ npm run cli -- render --input ./data/episode.mp3
 npm run cli -- render --input ./data/episode.mp3 --config ./config/presets/lime-show.yaml
 npm run cli -- render --input ./data/episode.mp3 --output episode-final.mp4 --language en
 npm run cli -- render --input ./data/episode.mp3 --style clean-feed --background blue
+npm run cli -- render --input ./data/episode.mp3 --style orbit --theme midnight-lime
 npm run cli -- render --input ./data/episode.mp3 --background "#1E88E5" --font-color "#FFFFFF" --highlight-color "#FFD400"
 ```
 
-`--background` takes either a preset name (`white`, `black`, `grey`, `silver`,
-`blue`) or any hex value; `--font-color` / `--highlight-color` set `text.color` and
-`text.highlightColor`.
+`--theme` picks a color theme (see [Color themes](#color-themes)); without it the
+style's own default theme is used. `--background` takes either a preset name
+(`white`, `black`, `grey`, `silver`, `blue`) or any hex value; `--font-color` /
+`--highlight-color` set `text.color` and `text.highlightColor`. Each of these three
+overrides just that one color of the theme.
 
 Exit codes are non-zero on any failure, with the failing stage and a human-readable
 message logged (see `src/errors.ts` for the full list — invalid API key, plan-tier
@@ -144,9 +147,41 @@ band gets across the whole track (`remotion/util/useAudioBands.ts`), so beats an
 stressed syllables visibly hit on quiet speech as well as loud music, and silence
 stays flat.
 
-![The four reveal styles](docs/screenshots/all-styles.png)
-
 ![Waveform and spectrum at rest in silence, swelling on a beat](docs/screenshots/beat-sync.png)
+
+### Color themes
+
+Each video is generated from a **style** plus a **color theme**. A theme sets three
+colors: the background, the text, and the highlight — the current (bold) word in
+`clean-feed`/`vertical-show`/`orbit`, the card behind the word in `focus-word`, the
+progress bar, and the `waveform` background's bars.
+
+| Theme | Background | Text | Bold word | Default for |
+|---|---|---|---|---|
+| `midnight-lime` | `#0E0E16` | `#F5F5F7` | `#C6FF34` | `focus-word` |
+| `cream-coral` | `#F6F1E7` | `#1B1B1F` | `#FF5A36` | `clean-feed` |
+| `electric-blue` | `#1F3BFF` | `#FFFFFF` | `#FFE14D` | `vertical-show` |
+| `lime-violet` | `#C6FF34` | `#111111` | `#6A2BFF` | `orbit` |
+
+![Each style with its default theme](docs/screenshots/style-defaults.png)
+
+How the colors are decided, lowest to highest priority:
+
+1. The style's default theme (table above).
+2. A chosen theme: `--theme` (CLI), the `theme` field (API), the **Color Theme**
+   dropdown (n8n form), or `theme:` in a config file.
+3. Any single color set explicitly: `--background` / `--font-color` /
+   `--highlight-color`, the `background` / `fontColor` / `highlightColor` fields, or
+   `background.color` / `text.color` / `text.highlightColor` in a config file (e.g.
+   `config/presets/lime-show.yaml`). This replaces just that color and keeps the rest
+   of the theme.
+
+![Picking a theme, and overriding one color](docs/screenshots/theme-overrides.png)
+
+Every style against every theme, for comparison:
+[docs/screenshots/color-options.png](docs/screenshots/color-options.png). To add a
+theme, add it to `COLOR_THEMES` in `src/themes.ts` and to the Color Theme dropdown in
+`n8n/kinetic-render-workflow.json`; change a style's default in `STYLE_DEFAULT_THEME`.
 
 `vertical-show` and `orbit` already draw their own waveform/spectrum — pair them with
 `background.type: solid` or `gradient`, not `waveform` (both would render). A ready-made
@@ -176,10 +211,9 @@ instead of dedicated fields.
 
 - `solid` — flat `background.color`. Set it with `--background <color>` (CLI) or the
   `background` field (webhook/n8n) — either a preset (`white`, `black`, `grey`,
-  `silver`, `blue`) or any hex value like `#1E88E5`. Text color/highlight are set
-  separately with `--font-color` / `--highlight-color` or `text.color` /
-  `text.highlightColor` in a config. Both also affect the `waveform` type's backdrop
-  (it reads `background.color`). Ignored by `gradient`/`video`.
+  `silver`, `blue`) or any hex value like `#1E88E5`; unset, it comes from the
+  [color theme](#color-themes). Also used as the `waveform` type's backdrop. Ignored
+  by `gradient`/`video`.
 - `gradient` — linear gradient between `background.gradient.from`/`to` at `angle` degrees.
 - `video` — looping video or static image; set `background.mediaPath` to a file path
   (it's copied into `remotion/public/backgrounds/` automatically at render time).
@@ -212,21 +246,21 @@ instead of dedicated fields.
 ```bash
 npm run typecheck        # TypeScript across src/, remotion/ and scripts/
 npm run test:uniscribe   # checks your UniScribe key/plan and timestamp granularity (needs UNISCRIBE_API_KEY)
-npm run test:render -- orbit solid "#C6FF34"   # renders output/smoketest-orbit-solid.mp4, no UniScribe call
+npm run test:render -- orbit solid   # renders output/smoketest-orbit-lime-violet-solid.mp4, no UniScribe call
 ```
 
 `test:render` takes `[style] [background-type] [background-color]` (style is one of
 `focus-word`, `clean-feed`, `vertical-show`, `orbit`) and renders a ~40s clip from a
 synthetic transcript over `data/smoketest.wav`. Optional env vars:
+`SMOKETEST_THEME` (a theme name; unset uses the style's default),
 `SMOKETEST_FONT_COLOR`, `SMOKETEST_HIGHLIGHT_COLOR` (hex), `SMOKETEST_COVER_IMAGE`
 (path to the image shown by `vertical-show`/`orbit`), and
-`SMOKETEST_ORIENTATION=horizontal`. To check all four styles with your own colors and
+`SMOKETEST_ORIENTATION=horizontal`. To check all four styles in a theme with your own
 image:
 
 ```bash
 for s in focus-word clean-feed vertical-show orbit; do
-  SMOKETEST_COVER_IMAGE=data/cover.jpg SMOKETEST_FONT_COLOR="#111111" SMOKETEST_HIGHLIGHT_COLOR="#111111" \
-    npm run test:render -- $s solid "#C6FF34"
+  SMOKETEST_THEME=midnight-lime SMOKETEST_COVER_IMAGE=data/cover.jpg npm run test:render -- $s solid
 done
 ```
 
@@ -236,10 +270,11 @@ To check the API end to end, start it with `npm run webhook` and:
 curl localhost:4000/health
 curl localhost:4000/styles           # revealStyles lists exactly the four styles
 curl -X POST localhost:4000/render -F "audio=@data/smoketest.wav" -F "cover=@data/cover.jpg" \
-  -F "style=orbit" -F "background=#C6FF34" -F "fontColor=#111111" -F "highlightColor=#111111"
+  -F "style=orbit" -F "theme=midnight-lime"
 ```
 
-A removed style (e.g. `style=karaoke`) or a non-hex color returns `400` with the reason.
+A removed style (e.g. `style=karaoke`), an unknown theme, or a non-hex color returns
+`400` with the reason.
 
 ## Docker
 

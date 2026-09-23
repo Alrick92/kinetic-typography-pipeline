@@ -53,6 +53,8 @@ export interface PipelineConfig {
     fps: number;
     directory: string;
   };
+  /** named color theme (see src/themes.ts); null picks the style's default theme */
+  theme: string | null;
   reveal: {
     style: RevealStyle;
   };

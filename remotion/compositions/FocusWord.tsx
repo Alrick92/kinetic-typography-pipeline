@@ -5,6 +5,7 @@ import { findAnchorCueIndex } from "../util/findActiveCue";
 import { PopWord } from "../shared/PopWord";
 import { ProgressBar } from "../shared/ProgressBar";
 import { resolveFontFamily } from "../shared/fonts";
+import { fitFontSize } from "../util/fitFontSize";
 
 function formatTime(sec: number): string {
   const m = Math.floor(sec / 60);
@@ -29,7 +30,9 @@ export const FocusWordComposition: React.FC<RenderInputProps> = ({ schedule, con
   const prevCue = activeIndex > 0 ? schedule.cues[activeIndex - 1] : null;
   const nextCue = activeIndex >= 0 && activeIndex < schedule.cues.length - 1 ? schedule.cues[activeIndex + 1] : null;
   const progress = durationSec > 0 ? timeSec / durationSec : 0;
-  const contextFontSize = config.text.fontSize * 0.32;
+  const contextFontSize = config.text.fontSize * 0.42;
+  // The current word is the hero of this style: large, but shrunk to fit long words.
+  const wordFontSize = cue ? fitFontSize(cue.text, config.text.fontSize * 1.8, width * 0.8, 0.8) : config.text.fontSize;
 
   return (
     <AbsoluteFill>
@@ -42,7 +45,7 @@ export const FocusWordComposition: React.FC<RenderInputProps> = ({ schedule, con
         <div style={{ fontFamily: resolveFontFamily(config.text.font), fontSize: contextFontSize, color: config.text.color, opacity: 0.35, fontWeight: 600, height: contextFontSize * 1.3 }}>
           {prevCue?.text ?? ""}
         </div>
-        <PopWord cue={cue} frame={frame} fps={fps} text={config.text} cardColor={config.text.highlightColor} textColor={config.background.color} />
+        <PopWord cue={cue} frame={frame} fps={fps} text={config.text} fontSize={wordFontSize} cardColor={config.text.highlightColor} textColor={config.background.color} />
         <div style={{ fontFamily: resolveFontFamily(config.text.font), fontSize: contextFontSize, color: config.text.color, opacity: 0.35, fontWeight: 600, height: contextFontSize * 1.3 }}>
           {nextCue?.text ?? ""}
         </div>

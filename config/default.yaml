@@ -10,6 +10,15 @@ output:
   fps: 30
   directory: ./output
 
+# Color theme: "midnight-lime" | "electric-blue" | "cream-coral" | "lime-violet".
+# null uses the style's default theme:
+#   focus-word -> midnight-lime, clean-feed -> cream-coral,
+#   vertical-show -> electric-blue, orbit -> lime-violet
+# The theme sets background.color, text.color, text.highlightColor and
+# background.waveform.color; any of those set explicitly in an override (config file,
+# configOverrides, or the background/fontColor/highlightColor fields) wins over it.
+theme: null
+
 reveal:
   # "focus-word"   - one word at a time on a highlight card, faded prev/next word, progress bar, elapsed timer
   # "clean-feed"   - continuous flowing lines, spoken word bold, past/future text faded
@@ -20,16 +29,19 @@ reveal:
 text:
   font: "Space Grotesk"
   fontSize: 90
+  # color/highlightColor below are replaced by the theme unless set in an override
   color: "#FFFFFF"
   highlightColor: "#FFD400"
   strokeColor: "#000000"
-  strokeWidth: 8
+  # outline around caption words; 0 = none (the themes are designed without one)
+  strokeWidth: 0
   # "center" | "lower-third"
   position: center
 
 background:
   # "solid" | "gradient" | "video" | "waveform"
   type: solid
+  # replaced by the theme unless set in an override
   color: "#111111"
   gradient:
     from: "#1e1e2f"

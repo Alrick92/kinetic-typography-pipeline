@@ -7,6 +7,7 @@ import { AvatarImage } from "../shared/AvatarImage";
 import { RadialSpectrum } from "../shared/RadialSpectrum";
 import { DotProgress } from "../shared/DotProgress";
 import { resolveFontFamily } from "../shared/fonts";
+import { fitFontSize } from "../util/fitFontSize";
 
 export const OrbitComposition: React.FC<RenderInputProps> = ({ schedule, config, audioFileName, durationSec }) => {
   const frame = useCurrentFrame();
@@ -70,7 +71,14 @@ export const OrbitComposition: React.FC<RenderInputProps> = ({ schedule, config,
         <DotProgress total={config.show.totalChapters} filled={filledDots} color={config.text.color} mutedColor={`${config.text.color}55`} />
       </AbsoluteFill>
       <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: width * 0.14 }}>
-        <PopWord cue={cue} frame={frame} fps={fps} text={config.text} />
+        <PopWord
+          cue={cue}
+          frame={frame}
+          fps={fps}
+          text={config.text}
+          fontSize={cue ? fitFontSize(cue.text, config.text.fontSize * 1.3, width * 0.85) : undefined}
+          textColor={config.text.highlightColor}
+        />
       </AbsoluteFill>
     </AbsoluteFill>
   );
