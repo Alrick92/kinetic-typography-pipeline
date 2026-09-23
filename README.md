@@ -178,9 +178,23 @@ How the colors are decided, lowest to highest priority:
 
 ![Picking a theme, and overriding one color](docs/screenshots/theme-overrides.png)
 
-Every style against every theme, for comparison:
-[docs/screenshots/color-options.png](docs/screenshots/color-options.png). To add a
-theme, add it to `COLOR_THEMES` in `src/themes.ts` and to the Color Theme dropdown in
+#### Template gallery
+
+Each template in all four themes (same frame, the current word is "audio"):
+
+**Focus Word** (`focus-word`)
+![Focus Word in every theme](docs/screenshots/templates/focus-word.png)
+
+**Clean Feed** (`clean-feed`)
+![Clean Feed in every theme](docs/screenshots/templates/clean-feed.png)
+
+**Vertical Show** (`vertical-show`)
+![Vertical Show in every theme](docs/screenshots/templates/vertical-show.png)
+
+**Orbit** (`orbit`)
+![Orbit in every theme](docs/screenshots/templates/orbit.png)
+
+To add a theme, add it to `COLOR_THEMES` in `src/themes.ts` and to the Color Theme dropdown in
 `n8n/kinetic-render-workflow.json`; change a style's default in `STYLE_DEFAULT_THEME`.
 
 `vertical-show` and `orbit` already draw their own waveform/spectrum — pair them with
