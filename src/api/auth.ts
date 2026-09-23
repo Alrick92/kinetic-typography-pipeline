@@ -10,6 +10,11 @@ export function requireApiKey(req: Request, res: Response, next: NextFunction) {
   const expected = process.env.API_KEY;
   if (!expected) return next();
   if (req.path === "/health") return next();
+  // UniScribe calls this back without an X-API-Key header, so requiring one here
+  // would make mode: "webhook" fail every transcription with a 401. It only resumes
+  // a job already registered in-memory under a job id it echoes back, so it is not
+  // an unauthenticated way to start work.
+  if (req.path === "/uniscribe/webhook") return next();
 
   const provided = req.header("X-API-Key");
   if (provided !== expected) {

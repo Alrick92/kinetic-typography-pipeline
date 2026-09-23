@@ -58,18 +58,9 @@
             },
             {
               "fieldLabel": "Background Color",
-              "fieldType": "dropdown",
+              "fieldType": "text",
               "requiredField": false,
-              "placeholder": "Applies to solid backgrounds (and the waveform backdrop); ignored for gradient/video. Leave blank to keep the config default",
-              "fieldOptions": {
-                "values": [
-                  { "option": "White" },
-                  { "option": "Black" },
-                  { "option": "Grey" },
-                  { "option": "Silver" },
-                  { "option": "Blue" }
-                ]
-              }
+              "placeholder": "Optional: a preset (White, Black, Grey, Silver, Blue) or any hex like #1E88E5. Applies to solid backgrounds (and the waveform backdrop); ignored for gradient/video. Leave blank to keep the config default"
             },
             {
               "fieldLabel": "Language Code",
@@ -110,6 +101,18 @@
               "fieldType": "text",
               "requiredField": false,
               "placeholder": "Only used by Orbit, e.g. EP. 12"
+            },
+            {
+              "fieldLabel": "Font Color",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "Optional hex text color, e.g. #FFFFFF. Leave blank to keep the config default"
+            },
+            {
+              "fieldLabel": "Highlight Color",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "Optional hex active-word/highlight color, e.g. #FFD400. Leave blank to keep the config default"
             }
           ]
         },
@@ -133,7 +136,9 @@
             { "id": "map-3", "name": "languageCode", "type": "string", "value": "={{ $json['Language Code'] }}" },
             { "id": "map-4", "name": "title", "type": "string", "value": "={{ $json['Title'] || '' }}" },
             { "id": "map-5", "name": "description", "type": "string", "value": "={{ $json['Description'] || '' }}" },
-            { "id": "map-6", "name": "episodeLabel", "type": "string", "value": "={{ $json['Episode Label'] || '' }}" }
+            { "id": "map-6", "name": "episodeLabel", "type": "string", "value": "={{ $json['Episode Label'] || '' }}" },
+            { "id": "map-7", "name": "fontColor", "type": "string", "value": "={{ ($json['Font Color'] || '') }}" },
+            { "id": "map-8", "name": "highlightColor", "type": "string", "value": "={{ ($json['Highlight Color'] || '') }}" }
           ]
         },
         "includeOtherFields": true,
@@ -184,6 +189,8 @@
             { "parameterType": "formData", "name": "description", "value": "={{ $json.description }}" },
             { "parameterType": "formData", "name": "episodeLabel", "value": "={{ $json.episodeLabel }}" },
             { "parameterType": "formData", "name": "languageCode", "value": "={{ $json.languageCode }}" },
+            { "parameterType": "formData", "name": "fontColor", "value": "={{ $json.fontColor }}" },
+            { "parameterType": "formData", "name": "highlightColor", "value": "={{ $json.highlightColor }}" },
             { "parameterType": "formData", "name": "configOverrides", "value": "={{ JSON.stringify({ background: { type: $json.backgroundType } }) }}" },
             { "parameterType": "formBinaryData", "name": "audio", "inputDataFieldName": "={{ Object.keys($binary || {})[0] }}" }
           ]

@@ -92,9 +92,18 @@ export async function renderVideo(opts: RenderOptions): Promise<string> {
   });
 
   fs.mkdirSync(opts.config.output.directory, { recursive: true });
-  const outputLocation = path.resolve(opts.config.output.directory, opts.outputFileName);
+  // outputFileName is caller-supplied (request body / CLI flag). Strip any directory
+  // components so a value like "../foo.mp4" or "/etc/foo" can't write outside output.directory.
+  const safeFileName = path.basename(opts.outputFileName);
+  if (!safeFileName || safeFileName === "." || safeFileName === "..") {
+    throw new RenderError(`Invalid output file name "${opts.outputFileName}"`);
+  }
+  const outputLocation = path.resolve(opts.config.output.directory, safeFileName);
 
   log.info({ outputLocation, width: composition.width, height: composition.height, durationInFrames: composition.durationInFrames }, "rendering media");
+  // onProgress fires many times per percent bucket, so track the last bucket logged
+  // rather than re-emitting for every callback that still rounds to the same value.
+  let lastLoggedDecile = -1;
   try {
     await renderMedia({
       composition,
@@ -104,7 +113,9 @@ export async function renderVideo(opts: RenderOptions): Promise<string> {
       outputLocation,
       inputProps,
       onProgress: ({ progress }) => {
-        if (Math.round(progress * 100) % 10 === 0) {
+        const decile = Math.floor(progress * 10);
+        if (decile > lastLoggedDecile) {
+          lastLoggedDecile = decile;
           log.info({ progress: `${Math.round(progress * 100)}%` }, "render progress");
         }
       },

@@ -8,7 +8,8 @@
  *   reveal-style: word-pop | karaoke | focus-word | clean-feed | lyrics-scroll | quote-card | vertical-show | orbit
  *   SMOKETEST_ORIENTATION=horizontal renders 1920x1080 instead of the default vertical frame
  *   background-type: solid | gradient | waveform
- *   background-color: white | black | grey | silver | blue (optional preset override)
+ *   background-color: white | black | grey | silver | blue, or a hex value like #1E88E5
+ *   SMOKETEST_FONT_COLOR / SMOKETEST_HIGHLIGHT_COLOR: hex text/active-word colors
  */
 import "dotenv/config";
 import path from "node:path";
@@ -66,6 +67,14 @@ async function main() {
       type: backgroundType,
       ...(backgroundColorName ? { color: resolveBackgroundColor(backgroundColorName) } : {}),
     },
+    ...(process.env.SMOKETEST_FONT_COLOR || process.env.SMOKETEST_HIGHLIGHT_COLOR
+      ? {
+          text: {
+            ...(process.env.SMOKETEST_FONT_COLOR ? { color: process.env.SMOKETEST_FONT_COLOR } : {}),
+            ...(process.env.SMOKETEST_HIGHLIGHT_COLOR ? { highlightColor: process.env.SMOKETEST_HIGHLIGHT_COLOR } : {}),
+          },
+        }
+      : {}),
   });
   const transcript = buildFakeTranscript();
   const schedule = buildSchedule(transcript, style);
