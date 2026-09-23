@@ -1,10 +1,7 @@
 import React from "react";
-import { staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { useAudioData, visualizeAudio } from "@remotion/media-utils";
-import { toDisplayBands } from "../util/audioBands";
+import { useAudioBands } from "../util/useAudioBands";
 
-const NUM_BARS = 40;
-const NUM_SAMPLES = 64; // visualizeAudio requires a power of two
+const NUM_BANDS = 20;
 
 export const MiniWaveform: React.FC<{ audioFileName: string; color: string; width: number; height: number }> = ({
   audioFileName,
@@ -12,18 +9,18 @@ export const MiniWaveform: React.FC<{ audioFileName: string; color: string; widt
   width,
   height,
 }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const audioData = useAudioData(staticFile(audioFileName));
+  const bands = useAudioBands(audioFileName, NUM_BANDS);
 
-  if (!audioData) return <div style={{ width, height }} />;
+  if (!bands) return <div style={{ width, height }} />;
 
-  const frequencies = toDisplayBands(visualizeAudio({ fps, frame, audioData, numberOfSamples: NUM_SAMPLES }), NUM_BARS);
-  const barWidth = width / NUM_BARS;
+  // Mirrored with the bass in the middle, so the waveform swells symmetrically from the
+  // centre on every beat instead of only its leftmost (bass) bars moving.
+  const bars = [...bands].reverse().concat(bands);
+  const barWidth = width / bars.length;
 
   return (
     <svg width={width} height={height}>
-      {frequencies.map((amplitude, i) => {
+      {bars.map((amplitude, i) => {
         const barHeight = Math.max(3, amplitude * height);
         const x = i * barWidth;
         const y = (height - barHeight) / 2;

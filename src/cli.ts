@@ -24,7 +24,7 @@ program
   .option("-l, --language <code>", "language code for transcription", "en")
   .option("-o, --output <file>", "output MP4 filename (relative to output.directory)")
   .option("-w, --webhook-url <url>", "UniScribe webhook URL for completion notification")
-  .option("--style <style>", "reveal style override: word-pop, karaoke, focus-word, clean-feed, lyrics-scroll, quote-card, vertical-show, orbit")
+  .option("--style <style>", "reveal style override: focus-word, clean-feed, vertical-show, orbit")
   .option("--background <color>", "background color: a preset (white, black, grey, silver, blue) or a hex value like #1E88E5")
   .option("--font-color <color>", "text color (hex, e.g. #FFFFFF)")
   .option("--highlight-color <color>", "highlight/active-word color (hex, e.g. #FFD400)")

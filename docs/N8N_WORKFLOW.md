@@ -1,15 +1,21 @@
 # n8n Workflow: Upload & Wait (Web Form)
 
-A ready-made n8n workflow with a web form: upload an audio file, pick style/
-background/language from real dropdowns, and get the finished MP4 back once
-rendering completes — a single synchronous "upload and wait" interaction.
+A ready-made n8n workflow with a web form: upload an audio file (and optionally a
+cover image), pick one of the four styles, set the background/font/highlight colors,
+and get the finished MP4 back once rendering completes — a single synchronous
+"upload and wait" interaction.
 
 File: [`n8n/kinetic-render-workflow.json`](../n8n/kinetic-render-workflow.json)
 
 ## How it works
 
 ```
-Kinetic Render Form -> Read Form Fields -> Config -> Upload Audio (POST /render)
+Kinetic Render Form -> Read Form Fields -> Config -> Has Cover Image?
+                                                      yes |            | no
+                                                          v            v
+                                        Upload Audio + Cover      Upload Audio   (POST /render)
+                                                          \            /
+                                                           Render Job
                                                             |
                                                             v
                                                     Wait Before Check <---------+
@@ -29,29 +35,40 @@ Kinetic Render Form -> Read Form Fields -> Config -> Upload Audio (POST /render)
 ```
 
 - **Kinetic Render Form** — an n8n **Form Trigger** (not a plain JSON webhook).
-  Fields: **Audio File** (upload), and real dropdowns for **Style**,
-  **Background Type**, and **Language Code**, plus optional text fields
-  **Background Color** (a preset name — White/Black/Grey/Silver/Blue — or any hex
-  like `#1E88E5`; only applies to `solid`-type backgrounds and the `waveform`
-  backdrop), **Font Color** / **Highlight Color** (hex text and active-word colors),
-  **Title**, **Description**, and **Episode Label** (the last three are only read by
-  `vertical-show`/`orbit`). `responseMode: responseNode` holds the page open until a
-  "Respond to Webhook" node runs — that's what makes "submit and wait for the video"
-  work as one request.
+  Fields, in order:
+  - **Audio File** (upload, required)
+  - **Style** (dropdown, required) — exactly the four styles: `focus-word`,
+    `clean-feed`, `vertical-show`, `orbit`
+  - **Cover Image** (upload, optional — `.jpg`/`.png`/`.webp`) — the circular photo
+    shown by `vertical-show`/`orbit`; without one they show a placeholder circle in
+    the highlight color
+  - **Background Color** (optional) — a preset name (White/Black/Grey/Silver/Blue) or
+    any hex like `#1E88E5`
+  - **Font Color** / **Highlight Color** (optional) — hex text and active-word colors
+  - **Title**, **Description**, **Episode Label** (optional, only read by
+    `vertical-show`/`orbit`)
+  - **Language Code** (dropdown, required) — the transcription language
+
+  Blank optional fields keep the config default. `responseMode: responseNode` holds
+  the page open until a "Respond to Webhook" node runs — that's what makes "submit
+  and wait for the video" work as one request.
 - **Read Form Fields** — maps the form's labeled answers (`$json['Style']`, etc.)
   to the plain field names the rest of the workflow uses.
 - **Config** — infrastructure settings only: `apiBaseUrl`, `apiKey`, the poll
   interval, and a safety-net attempt cap. Not user-facing — set once by whoever
   installs this workflow.
-- **Upload Audio** — `POST {apiBaseUrl}/render` with the audio forwarded as binary
-  multipart data (the binary property name is resolved dynamically via
-  `Object.keys($binary)[0]`, so it doesn't matter what n8n internally calls the
-  form's uploaded file), plus the chosen style/background/etc. as form fields.
-  `background` (the color preset) is sent as the API's own `background` shorthand
-  field directly; `backgroundType` goes through as a `configOverrides` JSON blob
-  since the API's shorthand fields don't include it directly. Left blank, an empty
-  `background` value is ignored server-side rather than erroring. Returns
+- **Has Cover Image?** — an IF node: true when the submission carries a second
+  uploaded file. The two branches differ only in whether a `cover` file is sent,
+  because an HTTP Request node errors on a binary field that doesn't exist.
+- **Upload Audio** / **Upload Audio + Cover** — `POST {apiBaseUrl}/render` with the
+  audio (and cover) forwarded as binary multipart data, plus the chosen style/colors/
+  etc. as form fields. The binary property names are resolved dynamically (the key
+  containing "audio", and the key containing "cover"/"image", falling back to the
+  first/second file) so it doesn't matter exactly what n8n calls the uploads. Blank
+  color fields are ignored server-side rather than erroring. Returns
   `{ jobId, statusUrl, downloadUrl }`.
+- **Render Job** — keeps `statusUrl`/`downloadUrl` from whichever upload branch ran,
+  for the polling loop to reference.
 - **Wait Before Check** → **Check Job Status** — polls `GET {apiBaseUrl}{statusUrl}`
   every `pollSeconds` (default 15s).
 - **Job Status Router** — a Switch node with three outcomes:
@@ -77,18 +94,17 @@ Kinetic Render Form -> Read Form Fields -> Config -> Upload Audio (POST /render)
 
 ## Using it
 
-Open the form URL in a browser: upload an audio file, pick **Style**,
-**Background Type**, and **Language Code** from the dropdowns, optionally fill in
-**Background Color**/**Font Color**/**Highlight Color** (hex) and
-**Title**/**Description**/**Episode Label**, and
-submit. The page won't respond until the video is fully rendered — expect anywhere
+Open the form URL in a browser: upload an audio file, pick a **Style** and
+**Language Code**, optionally upload a **Cover Image** and fill in
+**Background Color**/**Font Color**/**Highlight Color** and
+**Title**/**Description**/**Episode Label**, and submit. The page won't respond until the video is fully rendered — expect anywhere
 from under a minute (short clips) to several minutes (long files, cold Chromium
 start) — then the MP4 downloads.
 
 n8n Form Trigger endpoints also accept a plain programmatic `multipart/form-data`
-POST (same field names as the form labels: `Audio File`, `Style`, `Background Type`,
-`Background Color`, `Language Code`, `Font Color`, `Highlight Color`, `Title`,
-`Description`, `Episode Label`), if you
+POST (same field names as the form labels: `Audio File`, `Style`, `Cover Image`,
+`Background Color`, `Font Color`, `Highlight Color`, `Title`, `Description`,
+`Episode Label`, `Language Code`), if you
 want to call this from a script instead of a browser.
 
 ## Timeouts you may need to raise
@@ -135,10 +151,11 @@ n8n instance, since I don't have one to test against here. The overall structure
 node wiring, and expressions are correct n8n patterns, but two specific details are
 best-effort and worth a quick look after you import:
 
-- **Form Trigger's file-field binary property name**: I made **Upload Audio**
-  resolve it dynamically (`Object.keys($binary)[0]`) specifically to avoid needing
-  to guess this — it should work regardless of what n8n calls it internally, as
-  long as the form submission has exactly one uploaded file (true here).
+- **Form Trigger's file-field binary property names**: the upload nodes pick the
+  audio and cover by name (a key containing "audio" / "cover" or "image"), falling
+  back to the first/second uploaded file, and **Has Cover Image?** counts uploaded
+  files. If your n8n version names the keys differently or includes an empty entry
+  for a skipped Cover Image field, those three expressions are the only place to adjust.
 - **Form Trigger's `responseMode: "responseNode"` support**: documented n8n
   behavior mirrors the plain Webhook node's response modes, but if your n8n version
   handles this differently, the fix is limited to that one node's `options` — the
@@ -164,12 +181,9 @@ second that the caller triggers separately to check `GET /render/:jobId` and fet
   trim (e.g. more language codes; UniScribe supports 63).
 - **A plain audio-only webhook instead of a form** (fixed options, no per-request
   choices): swap **Kinetic Render Form** back for a `n8n-nodes-base.webhook` node
-  and hardcode `style`/`backgroundType`/etc. as fixed values in **Config** — this is
+  and hardcode `style`/`background`/etc. as fixed values in **Config** — this is
   what an earlier version of this workflow did; ask if you want that variant instead
   or alongside this one.
 - **Extra config overrides** (e.g. selecting a config preset file, `mode: "webhook"`):
   add another `formData` entry to **Upload Audio**'s body parameters, sourced from
   a new field on the form (or a fixed value in **Config**).
-- **Cover image for vertical-show/orbit**: add a second file field to the form and
-  forward it as a `formBinaryData` parameter named `cover` in **Upload Audio**,
-  mirroring the audio one (resolve its binary key the same dynamic way).

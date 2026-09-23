@@ -3,21 +3,9 @@ import { BACKGROUND_COLOR_PRESETS } from "../backgroundColors.js";
 /** Static metadata describing each reveal style, for API consumers building a style picker. */
 export const REVEAL_STYLE_CATALOG = [
   {
-    id: "word-pop",
-    label: "Word Pop",
-    description: "One word centered on screen at a time, replaced as speech progresses.",
-    requiresShowMetadata: false,
-  },
-  {
-    id: "karaoke",
-    label: "Karaoke",
-    description: "One short line at a time; words light up and stay lit as they're spoken.",
-    requiresShowMetadata: false,
-  },
-  {
     id: "focus-word",
     label: "Focus Word",
-    description: "Word-pop plus faded prev/next word context, elapsed timer, and a progress bar.",
+    description: "One word at a time on a highlight card, with faded prev/next word context, elapsed timer, and a progress bar.",
     requiresShowMetadata: false,
   },
   {
@@ -27,22 +15,9 @@ export const REVEAL_STYLE_CATALOG = [
     requiresShowMetadata: false,
   },
   {
-    id: "lyrics-scroll",
-    label: "Lyrics Scroll",
-    description: "Song-lyrics style: lines scroll vertically, previous lines above, current line bold and centered.",
-    requiresShowMetadata: false,
-  },
-  {
-    id: "quote-card",
-    label: "Quote Card",
-    description:
-      "Serif pull-quote filling in a passage at a time (spoken white, current word lime, upcoming grey), with a label and a scrolling waveform line. Has its own dark look; use a solid dark background.",
-    requiresShowMetadata: false,
-  },
-  {
     id: "vertical-show",
     label: "Vertical Show",
-    description: "Cover photo + title + waveform card, with word-pop captions in the lower third.",
+    description: "Cover photo + title + audio waveform card, with one-word captions in the lower third.",
     requiresShowMetadata: true,
   },
   {

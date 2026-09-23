@@ -71,14 +71,14 @@ Liveness check. Never requires auth.
 
 ### `GET /styles`
 
-Lists every reveal style and background type, for building a style picker without
+Lists the four reveal styles (`focus-word`, `clean-feed`, `vertical-show`, `orbit`) and the background types, for building a style picker without
 hardcoding the list client-side.
 
 **Response `200`**
 ```json
 {
   "revealStyles": [
-    { "id": "word-pop", "label": "Word Pop", "description": "...", "requiresShowMetadata": false },
+    { "id": "focus-word", "label": "Focus Word", "description": "...", "requiresShowMetadata": false },
     { "id": "orbit", "label": "Orbit", "description": "...", "requiresShowMetadata": true }
   ],
   "backgroundTypes": [
@@ -118,7 +118,7 @@ Use this from any HTTP client that isn't sharing a filesystem with the server.
 | `cover` | file | no | Cover/avatar image for `vertical-show` / `orbit` (equivalent to `show.coverImagePath`). |
 | `languageCode` | text | no | UniScribe language code, default `en`. |
 | `outputFileName` | text | no | Output MP4 filename. Defaults to the **original uploaded filename** with its extension swapped to `.mp4` (e.g. `episode.mp3` → `episode.mp4`) — not the randomized name the file is stored under on disk. |
-| `style` | text | no | Shorthand for `reveal.style` (see [styles](#reveal-styles--show-metadata)). |
+| `style` | text | no | Shorthand for `reveal.style`: `focus-word`, `clean-feed`, `vertical-show` or `orbit` (see [styles](#reveal-styles--show-metadata)); anything else is a `400`. |
 | `background` | text | no | Shorthand for `background.color` — either a preset (`white`, `black`, `grey`, `silver`, `blue`, see [`GET /styles`](#get-styles)) or any hex value like `#1E88E5`. Only visible for `solid`-type backgrounds and the `waveform` backdrop; ignored by `gradient`/`video`. An unknown value returns `400`. |
 | `fontColor` | text | no | Shorthand for `text.color` (hex, e.g. `#FFFFFF`). |
 | `highlightColor` | text | no | Shorthand for `text.highlightColor` (hex, e.g. `#FFD400`). |
@@ -161,7 +161,7 @@ curl -X POST http://localhost:4000/render \
     "audioFilePath": "/app/data/episode.mp3",
     "languageCode": "en",
     "outputFileName": "episode-final.mp4",
-    "configOverrides": { "reveal": { "style": "karaoke" } },
+    "configOverrides": { "reveal": { "style": "clean-feed" } },
     "mode": "poll"
   }'
 ```
@@ -265,8 +265,7 @@ Full descriptions are in [`GET /styles`](#get-styles) and the
 
 | Style | Needs `show.*`? |
 |---|---|
-| `word-pop`, `karaoke`, `focus-word`, `clean-feed`, `lyrics-scroll` | No |
-| `quote-card` | Optional — `episodeLabel` and `title` form its label (e.g. "EPISODE 01 - GROWTH"); hidden if both are empty. |
+| `focus-word`, `clean-feed` | No |
 | `vertical-show`, `orbit` | Yes — `title` (falls back to filename), `coverImagePath` (falls back to a placeholder circle), `description`, `episodeLabel`; `orbit` also uses `totalChapters` for its dot indicator (config-only, not a request field). |
 
 `vertical-show` and `orbit` render their own waveform/spectrum visualization — set

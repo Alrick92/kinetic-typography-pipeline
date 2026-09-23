@@ -7,7 +7,7 @@ configurable background), using UniScribe for transcription and Remotion for ren
 
 ```
 audio file -> UniScribe (transcribe) -> timestamp parse (+ interpolation fallback)
-           -> animation schedule (word-pop | karaoke) -> Remotion render -> MP4
+           -> animation schedule (word cues | line cues) -> Remotion render -> MP4
 ```
 
 - **Transcription** (`src/uniscribe/client.ts`): uploads the file via UniScribe's
@@ -18,9 +18,8 @@ audio file -> UniScribe (transcribe) -> timestamp parse (+ interpolation fallbac
   timestamps, `src/transcript/interpolate.ts` distributes each phrase's duration
   across its words proportionally to word length.
 - **Animation schedule** (`src/animation/schedule.ts`): converts the transcript into
-  either a flat list of word cues (used by word-pop, focus-word, and the caption strip
-  in vertical-show/orbit) or line cues with per-word timing (karaoke, lyrics-scroll,
-  clean-feed). Transcript segments can be a minute of continuous speech, so
+  either a flat list of word cues (used by focus-word and the caption strip in
+  vertical-show/orbit) or line cues with per-word timing (clean-feed). Transcript segments can be a minute of continuous speech, so
   `src/animation/lines.ts` splits each one into short lyric-length lines — at sentence
   ends, clause punctuation and pauses, then into evenly sized lines if still too long.
 - **Rendering** (`src/render/renderVideo.ts` + `remotion/`): bundles the Remotion
@@ -62,9 +61,9 @@ npm run test:uniscribe
 
 ```bash
 npm run cli -- render --input ./data/episode.mp3
-npm run cli -- render --input ./data/episode.mp3 --config ./config/karaoke-horizontal.yaml
+npm run cli -- render --input ./data/episode.mp3 --config ./config/presets/lime-show.yaml
 npm run cli -- render --input ./data/episode.mp3 --output episode-final.mp4 --language en
-npm run cli -- render --input ./data/episode.mp3 --style karaoke --background blue
+npm run cli -- render --input ./data/episode.mp3 --style clean-feed --background blue
 npm run cli -- render --input ./data/episode.mp3 --background "#1E88E5" --font-color "#FFFFFF" --highlight-color "#FFD400"
 ```
 
@@ -87,14 +86,14 @@ Two ways to trigger a render:
 - **Direct upload** — `POST /render` as `multipart/form-data` with an `audio` file
   field. Works from any HTTP client; no shared filesystem needed.
   ```bash
-  curl -X POST http://localhost:4000/render -F "audio=@episode.mp3" -F "style=karaoke"
+  curl -X POST http://localhost:4000/render -F "audio=@episode.mp3" -F "style=clean-feed"
   ```
 - **Server-side path** — `POST /render` as JSON with `audioFilePath` pointing to a
   file already on the server's filesystem. This is the n8n-friendly mode: write the
   incoming audio into the shared `./data` volume first (e.g. via n8n's "Move Binary
   Data" + "Write Binary File" nodes), then call this endpoint with that path.
   ```json
-  { "audioFilePath": "/app/data/episode.mp3", "configOverrides": { "reveal": { "style": "karaoke" } } }
+  { "audioFilePath": "/app/data/episode.mp3", "configOverrides": { "reveal": { "style": "clean-feed" } } }
   ```
 
 Both return `202 { jobId, statusUrl, downloadUrl }` immediately. Poll `GET
@@ -105,7 +104,8 @@ In n8n: an HTTP Request node posts to `/render`, then a polling loop (n8n's "Wai
 node + another HTTP Request) checks `/render/:jobId` until done.
 
 A ready-to-import n8n workflow doing exactly this via a web form — upload an audio
-file, pick style/background/language from dropdowns, wait, and get the finished MP4
+file (plus an optional cover image), pick one of the four styles, set
+background/font/highlight colors, wait, and get the finished MP4
 back as one synchronous submission — is at
 [`n8n/kinetic-render-workflow.json`](n8n/kinetic-render-workflow.json), documented in
 [docs/N8N_WORKFLOW.md](docs/N8N_WORKFLOW.md).
@@ -120,34 +120,28 @@ code changes needed.
 
 ### Reveal styles
 
-- `word-pop`: one word centered on screen at a time, replaced as the audio progresses.
-- `karaoke`: one short line visible at a time, the active word and all already-spoken
-  words in that line rendered in `highlightColor`, upcoming words in the base color.
-- `focus-word`: word-pop, plus faded previous/next word context above and below,
-  the active word on a rounded `highlightColor` card, an elapsed/total timer, and a
-  bottom progress bar.
+Exactly four styles are available (anything else is rejected by config validation):
+
+- `focus-word`: one word at a time on a rounded `highlightColor` card, with faded
+  previous/next word context above and below, an elapsed/total timer, and a bottom
+  progress bar.
 - `clean-feed`: continuous flowing lines — several transcript lines visible at once,
-  each in a fixed slot that smoothly scrolls up by one line at a time (same stable
-  mechanism as `lyrics-scroll`, so nothing reflows/jumps). Within the current line,
-  the active word is bold and in `highlightColor`, already-spoken words in that line
-  are dimmed, upcoming words dimmer still.
-- `lyrics-scroll`: song-lyrics style — one line (transcript phrase) per line, vertically
-  centered; the current line is bold/highlighted, previous lines sit above (dimmed,
-  already scrolled past), upcoming lines below. Smoothly animates to the next line's
-  position each time the active phrase advances, rather than jumping instantly.
-- `quote-card`: a serif pull-quote (Bodoni Moda) top-left, wrapped in curly quotes and
-  filled in a passage at a time — spoken words white, the current word lime, upcoming
-  words dark grey — then replaced by the next passage. Below it a lime rule and a
-  spaced mono label built from `show.episodeLabel` and `show.title` (e.g. "EPISODE 01 -
-  GROWTH"), and along the bottom a lime waveform line that follows the audio's loudness
-  and scrolls with it. It has its own fixed palette and fonts (not `text.*`); use a
-  dark `solid` background, not `waveform`, since it draws its own.
-- `vertical-show`: a "show card" (circular cover image, title, horizontal waveform,
-  description) in the upper frame, with word-pop captions in the lower third. Needs
+  each in a fixed slot that smoothly scrolls up by one line at a time (nothing
+  reflows/jumps). Within the current line, the active word is bold and in
+  `highlightColor`, already-spoken words in that line are dimmed, upcoming words
+  dimmer still.
+- `vertical-show`: a "show card" (circular cover image, title, audio waveform,
+  description) in the upper frame, with one-word captions in the lower third. Needs
   `show.title` / `show.coverImagePath` / `show.description` (see below).
 - `orbit`: circular avatar with a radial audio-spectrum spike ring, title, description
-  + episode label, and a chapter/progress dot indicator, with word-pop captions in the
+  + episode label, and a chapter/progress dot indicator, with one-word captions in the
   lower third. Needs the same `show.*` fields, plus `show.totalChapters` for the dots.
+
+The `vertical-show` waveform and `orbit` spike ring (and the `waveform` background) are
+driven by the audio frame by frame: each frequency band is scaled against how loud that
+band gets across the whole track (`remotion/util/useAudioBands.ts`), so beats and
+stressed syllables visibly hit on quiet speech as well as loud music, and silence
+stays flat.
 
 `vertical-show` and `orbit` already draw their own waveform/spectrum — pair them with
 `background.type: solid` or `gradient`, not `waveform` (both would render). A ready-made
@@ -160,7 +154,7 @@ npm run cli -- render -i data/episode.mp3 --config config/presets/lime-show.yaml
 
 ### Show metadata (`show.*`, and `--title` / `--cover-image` / `--description` / `--episode-label`)
 
-Only used by `vertical-show` and `orbit`; ignored by every other reveal style.
+Only used by `vertical-show` and `orbit`; ignored by `focus-word` and `clean-feed`.
 
 | Field | CLI flag | Default when unset |
 |---|---|---|
@@ -195,7 +189,9 @@ instead of dedicated fields.
   in `remotion/Root.tsx`, add the style to `RevealStyle` in `src/types.ts` and to
   `REVEAL_STYLE_TO_COMPOSITION` in `src/render/renderVideo.ts`. It'll get the flat
   word-cue shape from `src/animation/schedule.ts` automatically unless you add it to
-  `PHRASE_BASED_STYLES` there (for karaoke-style phrase grouping instead).
+  `LINE_BASED_STYLES` there (for line grouping instead). Also add it to
+  `REVEAL_STYLE_CATALOG` (`src/api/styleCatalog.ts`), the zod enum in `src/config.ts`,
+  and the Style dropdown in `n8n/kinetic-render-workflow.json`.
 - **New background type**: add a component under `remotion/backgrounds/`, wire it
   into `remotion/backgrounds/Background.tsx`'s switch, and extend the `background`
   section of `config/default.yaml` + the zod schema in `src/config.ts`.
@@ -233,7 +229,7 @@ docker compose run --rm kinetic-typography npx tsx src/cli.ts render -i /app/dat
   surfaces `429`s as `RateLimitError` but does not currently auto-retry with backoff;
   add that in `UniScribeClient.request` if you hit it in practice.
 - Remotion was chosen over the FFmpeg `drawtext`/ASS-subtitle fallback: it gives full
-  React-based control over per-word animation (spring easing, karaoke highlighting,
+  React-based control over per-word animation (spring easing, active-word highlighting,
   waveform visualization) without hand-rolling ASS timing math, at the cost of a
   heavier Docker image (headless Chromium) and slower render-per-second-of-video
   than pure FFmpeg filters. Revisit if VPS CPU/RAM becomes a bottleneck on long files.

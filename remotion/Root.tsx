@@ -1,11 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Audio, Composition, staticFile } from "remotion";
-import { WordPopComposition } from "./compositions/WordPop";
-import { KaraokeComposition } from "./compositions/Karaoke";
 import { FocusWordComposition } from "./compositions/FocusWord";
 import { CleanFeedComposition } from "./compositions/CleanFeed";
-import { LyricsScrollComposition } from "./compositions/LyricsScroll";
-import { QuoteCardComposition } from "./compositions/QuoteCard";
 import { VerticalShowComposition } from "./compositions/VerticalShow";
 import { OrbitComposition } from "./compositions/Orbit";
 import { defaultInputProps, type RenderInputProps } from "./props";
@@ -29,12 +25,8 @@ const withFrame = (Comp: React.FC<RenderInputProps>): React.FC<RenderInputProps>
 const KARAOKE_SCHEDULE: AnimationSchedule = { style: "karaoke", cues: [] };
 
 const COMPOSITIONS: { id: string; component: React.FC<RenderInputProps>; schedule?: AnimationSchedule }[] = [
-  { id: "WordPop", component: WordPopComposition },
-  { id: "Karaoke", component: KaraokeComposition, schedule: KARAOKE_SCHEDULE },
   { id: "FocusWord", component: FocusWordComposition },
   { id: "CleanFeed", component: CleanFeedComposition, schedule: KARAOKE_SCHEDULE },
-  { id: "LyricsScroll", component: LyricsScrollComposition, schedule: KARAOKE_SCHEDULE },
-  { id: "QuoteCard", component: QuoteCardComposition, schedule: KARAOKE_SCHEDULE },
   { id: "VerticalShow", component: VerticalShowComposition },
   { id: "Orbit", component: OrbitComposition },
 ];

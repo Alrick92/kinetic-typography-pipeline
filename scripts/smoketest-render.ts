@@ -5,7 +5,7 @@
  * timing) in isolation, and as the "render spike" referenced in the README.
  *
  * Usage: npm run test:render -- [reveal-style] [background-type] [background-color]
- *   reveal-style: word-pop | karaoke | focus-word | clean-feed | lyrics-scroll | quote-card | vertical-show | orbit
+ *   reveal-style: focus-word | clean-feed | vertical-show | orbit
  *   SMOKETEST_ORIENTATION=horizontal renders 1920x1080 instead of the default vertical frame
  *   background-type: solid | gradient | waveform
  *   background-color: white | black | grey | silver | blue, or a hex value like #1E88E5
@@ -20,7 +20,7 @@ import { buildSchedule } from "../src/animation/schedule.js";
 import { resolveBackgroundColor } from "../src/backgroundColors.js";
 import type { Phrase, RevealStyle, TranscriptResult } from "../src/types.js";
 
-const style = (process.argv[2] as RevealStyle) ?? "word-pop";
+const style = (process.argv[2] as RevealStyle) ?? "focus-word";
 const backgroundType = (process.argv[3] as "solid" | "gradient" | "waveform") ?? "solid";
 const backgroundColorName = process.argv[4];
 

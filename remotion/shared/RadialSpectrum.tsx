@@ -1,9 +1,7 @@
 import React from "react";
-import { staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { useAudioData, visualizeAudio } from "@remotion/media-utils";
-import { toDisplayBands } from "../util/audioBands";
+import { useAudioBands } from "../util/useAudioBands";
 
-const NUM_SPIKES = 64; // visualizeAudio requires a power of two
+const NUM_BANDS = 32;
 
 export const RadialSpectrum: React.FC<{
   audioFileName: string;
@@ -12,19 +10,19 @@ export const RadialSpectrum: React.FC<{
   maxSpikeLength: number;
   size: number;
 }> = ({ audioFileName, color, innerRadius, maxSpikeLength, size }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const audioData = useAudioData(staticFile(audioFileName));
+  const bands = useAudioBands(audioFileName, NUM_BANDS);
 
-  if (!audioData) return null;
+  if (!bands) return null;
 
-  const frequencies = toDisplayBands(visualizeAudio({ fps, frame, audioData, numberOfSamples: NUM_SPIKES }), NUM_SPIKES);
+  // Mirrored left/right (bass at the top, treble at the bottom) so the whole ring pulses
+  // with the audio rather than one side of it.
+  const spikes = bands.concat([...bands].reverse());
   const center = size / 2;
 
   return (
     <svg width={size} height={size} style={{ position: "absolute", inset: 0 }}>
-      {frequencies.map((amplitude, i) => {
-        const angle = (i / frequencies.length) * Math.PI * 2;
+      {spikes.map((amplitude, i) => {
+        const angle = -Math.PI / 2 + ((i + 0.5) / spikes.length) * Math.PI * 2;
         const len = maxSpikeLength * Math.max(0.08, amplitude);
         const x1 = center + Math.cos(angle) * innerRadius;
         const y1 = center + Math.sin(angle) * innerRadius;

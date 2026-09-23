@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
+import { hashFile } from "../cache.js";
 import { RenderError } from "../errors.js";
 import { stageLogger } from "../logger.js";
 import type { AnimationSchedule, PipelineConfig } from "../types.js";
@@ -13,12 +14,8 @@ const REMOTION_ENTRY = path.resolve(process.cwd(), "remotion/index.ts");
 const REMOTION_PUBLIC_DIR = path.resolve(process.cwd(), "remotion/public");
 
 const REVEAL_STYLE_TO_COMPOSITION: Record<string, string> = {
-  "word-pop": "WordPop",
-  karaoke: "Karaoke",
   "focus-word": "FocusWord",
   "clean-feed": "CleanFeed",
-  "lyrics-scroll": "LyricsScroll",
-  "quote-card": "QuoteCard",
   "vertical-show": "VerticalShow",
   orbit: "Orbit",
 };
@@ -54,13 +51,15 @@ export async function renderVideo(opts: RenderOptions): Promise<string> {
 
   let backgroundConfig = opts.config.background;
   if (backgroundConfig.type === "video" && backgroundConfig.mediaPath) {
-    const relative = copyIntoPublic(backgroundConfig.mediaPath, "backgrounds", path.basename(backgroundConfig.mediaPath, path.extname(backgroundConfig.mediaPath)));
+    const relative = copyIntoPublic(backgroundConfig.mediaPath, "backgrounds", hashFile(backgroundConfig.mediaPath));
     backgroundConfig = { ...backgroundConfig, mediaPath: relative };
   }
 
   let showConfig = opts.config.show;
   if (showConfig.coverImagePath) {
-    const relative = copyIntoPublic(showConfig.coverImagePath, "show", path.basename(showConfig.coverImagePath, path.extname(showConfig.coverImagePath)));
+    // Keyed by content hash, not filename: copyIntoPublic skips existing files, so a
+    // new image saved under a previously used name would otherwise render the old one.
+    const relative = copyIntoPublic(showConfig.coverImagePath, "show", hashFile(showConfig.coverImagePath));
     showConfig = { ...showConfig, coverImagePath: relative };
   }
   if (!showConfig.title) {

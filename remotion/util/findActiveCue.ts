@@ -19,7 +19,7 @@ export function findActiveCueIndex<T extends { start: number; end: number }>(cue
 /**
  * Binary search for the last cue whose `start` is at or before `timeSec` — i.e. the
  * most recently begun cue, even if it has already ended (mid-pause between phrases).
- * Used by line-scrolling reveal styles (lyrics-scroll, clean-feed) to keep the view
+ * Used by line-scrolling reveal styles (clean-feed) to keep the view
  * anchored to the last-shown line during a silence gap, instead of `findActiveCueIndex`
  * returning -1 there and the scroll position snapping back to the first line.
  * Returns -1 if `timeSec` is before the first cue starts.

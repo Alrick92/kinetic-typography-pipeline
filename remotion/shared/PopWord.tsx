@@ -5,7 +5,7 @@ import { resolveFontFamily } from "./fonts";
 
 /**
  * The animated single-word display shared by every reveal style that shows one
- * word at a time (word-pop, focus-word, and the caption strip in vertical-show/orbit).
+ * word at a time (focus-word, and the caption strip in vertical-show/orbit).
  */
 export const PopWord: React.FC<{
   cue: Word | null;

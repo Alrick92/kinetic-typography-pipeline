@@ -25,8 +25,6 @@ function buildFakeTranscript(): TranscriptResult {
 }
 
 const RUNS: { style: RevealStyle; configPath?: string; overrides?: Record<string, unknown> }[] = [
-  { style: "word-pop", overrides: { background: { type: "solid" } } },
-  { style: "karaoke", overrides: { background: { type: "waveform" } } },
   { style: "focus-word", overrides: { background: { type: "solid" } } },
   { style: "clean-feed", overrides: { background: { type: "gradient" } } },
   {

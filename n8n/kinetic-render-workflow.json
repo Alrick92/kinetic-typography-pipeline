@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Setup\n1. Open **Config** and set `apiBaseUrl` to where the Kinetic Typography API is reachable from n8n (e.g. `http://kinetic-typography:4000` on the same Docker network, or `http://localhost:4000`).\n2. If the API has `API_KEY` set, put the same value in `apiKey`.\n3. Activate this workflow, open the **Kinetic Render Form** node, and copy its Production URL — open that URL in a browser to use the form.\n\n## What it does\nA person opens the form, uploads an audio file, and picks style/background/language\nfrom real dropdowns. The page doesn't respond until the video is fully rendered\n(transcription + render can take minutes) — the finished MP4 downloads directly.\nOutput filename matches the upload (`episode.mp3` → `episode.mp4`) automatically.\n\nSee docs/N8N_WORKFLOW.md for timeout settings you may need to raise (n8n, and any\nreverse proxy in front of it) and for calling this programmatically instead of via browser.",
+        "content": "## Setup\n1. Open **Config** and set `apiBaseUrl` to where the Kinetic Typography API is reachable from n8n (e.g. `http://kinetic-typography:4000` on the same Docker network, or `http://localhost:4000`).\n2. If the API has `API_KEY` set, put the same value in `apiKey`.\n3. Activate this workflow, open the **Kinetic Render Form** node, and copy its Production URL \u2014 open that URL in a browser to use the form.\n\n## What it does\nA person opens the form, uploads an audio file (and optionally a cover image), picks\none of the four styles, and optionally sets background/font/highlight colors. The page doesn't respond until the video is fully rendered\n(transcription + render can take minutes) \u2014 the finished MP4 downloads directly.\nOutput filename matches the upload (`episode.mp3` \u2192 `episode.mp4`) automatically.\n\nSee docs/N8N_WORKFLOW.md for timeout settings you may need to raise (n8n, and any\nreverse proxy in front of it) and for calling this programmatically instead of via browser.",
         "height": 400,
         "width": 440
       },
@@ -11,12 +11,15 @@
       "name": "Setup Notes",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-380, -160]
+      "position": [
+        -380,
+        -160
+      ]
     },
     {
       "parameters": {
         "formTitle": "Kinetic Typography Render",
-        "formDescription": "Upload an audio file and choose how the video should look.",
+        "formDescription": "Upload an audio file, pick a style, and optionally set the colors and a cover image.",
         "formFields": {
           "values": [
             {
@@ -32,57 +35,45 @@
               "requiredField": true,
               "fieldOptions": {
                 "values": [
-                  { "option": "word-pop" },
-                  { "option": "karaoke" },
-                  { "option": "focus-word" },
-                  { "option": "clean-feed" },
-                  { "option": "lyrics-scroll" },
-                  { "option": "quote-card" },
-                  { "option": "vertical-show" },
-                  { "option": "orbit" }
+                  {
+                    "option": "focus-word"
+                  },
+                  {
+                    "option": "clean-feed"
+                  },
+                  {
+                    "option": "vertical-show"
+                  },
+                  {
+                    "option": "orbit"
+                  }
                 ]
               }
             },
             {
-              "fieldLabel": "Background Type",
-              "fieldType": "dropdown",
-              "requiredField": true,
-              "fieldOptions": {
-                "values": [
-                  { "option": "solid" },
-                  { "option": "gradient" },
-                  { "option": "video" },
-                  { "option": "waveform" }
-                ]
-              }
+              "fieldLabel": "Cover Image",
+              "fieldType": "file",
+              "requiredField": false,
+              "acceptFileTypes": ".jpg,.jpeg,.png,.webp",
+              "multipleFiles": false
             },
             {
               "fieldLabel": "Background Color",
               "fieldType": "text",
               "requiredField": false,
-              "placeholder": "Optional: a preset (White, Black, Grey, Silver, Blue) or any hex like #1E88E5. Applies to solid backgrounds (and the waveform backdrop); ignored for gradient/video. Leave blank to keep the config default"
+              "placeholder": "Optional: a preset (White, Black, Grey, Silver, Blue) or any hex like #1E88E5. Leave blank to keep the config default"
             },
             {
-              "fieldLabel": "Language Code",
-              "fieldType": "dropdown",
-              "requiredField": true,
-              "fieldOptions": {
-                "values": [
-                  { "option": "en" },
-                  { "option": "es" },
-                  { "option": "fr" },
-                  { "option": "de" },
-                  { "option": "pt" },
-                  { "option": "it" },
-                  { "option": "nl" },
-                  { "option": "ja" },
-                  { "option": "ko" },
-                  { "option": "zh" },
-                  { "option": "ru" },
-                  { "option": "ar" },
-                  { "option": "hi" }
-                ]
-              }
+              "fieldLabel": "Font Color",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "Optional hex text color, e.g. #FFFFFF. Leave blank to keep the config default"
+            },
+            {
+              "fieldLabel": "Highlight Color",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "Optional hex active-word/highlight color, e.g. #FFD400. Leave blank to keep the config default"
             },
             {
               "fieldLabel": "Title",
@@ -103,16 +94,52 @@
               "placeholder": "Only used by Orbit, e.g. EP. 12"
             },
             {
-              "fieldLabel": "Font Color",
-              "fieldType": "text",
-              "requiredField": false,
-              "placeholder": "Optional hex text color, e.g. #FFFFFF. Leave blank to keep the config default"
-            },
-            {
-              "fieldLabel": "Highlight Color",
-              "fieldType": "text",
-              "requiredField": false,
-              "placeholder": "Optional hex active-word/highlight color, e.g. #FFD400. Leave blank to keep the config default"
+              "fieldLabel": "Language Code",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "en"
+                  },
+                  {
+                    "option": "es"
+                  },
+                  {
+                    "option": "fr"
+                  },
+                  {
+                    "option": "de"
+                  },
+                  {
+                    "option": "pt"
+                  },
+                  {
+                    "option": "it"
+                  },
+                  {
+                    "option": "nl"
+                  },
+                  {
+                    "option": "ja"
+                  },
+                  {
+                    "option": "ko"
+                  },
+                  {
+                    "option": "zh"
+                  },
+                  {
+                    "option": "ru"
+                  },
+                  {
+                    "option": "ar"
+                  },
+                  {
+                    "option": "hi"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -123,22 +150,64 @@
       "name": "Kinetic Render Form",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
-      "position": [-380, 260],
+      "position": [
+        -380,
+        260
+      ],
       "webhookId": "kinetic-render-form"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "map-1", "name": "style", "type": "string", "value": "={{ $json['Style'] }}" },
-            { "id": "map-2", "name": "backgroundType", "type": "string", "value": "={{ $json['Background Type'] }}" },
-            { "id": "map-2b", "name": "background", "type": "string", "value": "={{ ($json['Background Color'] || '').toLowerCase() }}" },
-            { "id": "map-3", "name": "languageCode", "type": "string", "value": "={{ $json['Language Code'] }}" },
-            { "id": "map-4", "name": "title", "type": "string", "value": "={{ $json['Title'] || '' }}" },
-            { "id": "map-5", "name": "description", "type": "string", "value": "={{ $json['Description'] || '' }}" },
-            { "id": "map-6", "name": "episodeLabel", "type": "string", "value": "={{ $json['Episode Label'] || '' }}" },
-            { "id": "map-7", "name": "fontColor", "type": "string", "value": "={{ ($json['Font Color'] || '') }}" },
-            { "id": "map-8", "name": "highlightColor", "type": "string", "value": "={{ ($json['Highlight Color'] || '') }}" }
+            {
+              "id": "map-1",
+              "name": "style",
+              "type": "string",
+              "value": "={{ $json['Style'] }}"
+            },
+            {
+              "id": "map-2b",
+              "name": "background",
+              "type": "string",
+              "value": "={{ ($json['Background Color'] || '').toLowerCase() }}"
+            },
+            {
+              "id": "map-3",
+              "name": "languageCode",
+              "type": "string",
+              "value": "={{ $json['Language Code'] }}"
+            },
+            {
+              "id": "map-4",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json['Title'] || '' }}"
+            },
+            {
+              "id": "map-5",
+              "name": "description",
+              "type": "string",
+              "value": "={{ $json['Description'] || '' }}"
+            },
+            {
+              "id": "map-6",
+              "name": "episodeLabel",
+              "type": "string",
+              "value": "={{ $json['Episode Label'] || '' }}"
+            },
+            {
+              "id": "map-7",
+              "name": "fontColor",
+              "type": "string",
+              "value": "={{ ($json['Font Color'] || '') }}"
+            },
+            {
+              "id": "map-8",
+              "name": "highlightColor",
+              "type": "string",
+              "value": "={{ ($json['Highlight Color'] || '') }}"
+            }
           ]
         },
         "includeOtherFields": true,
@@ -148,16 +217,39 @@
       "name": "Read Form Fields",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-160, 260]
+      "position": [
+        -160,
+        260
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "cfg-1", "name": "apiBaseUrl", "type": "string", "value": "http://localhost:4000" },
-            { "id": "cfg-2", "name": "apiKey", "type": "string", "value": "" },
-            { "id": "cfg-3", "name": "pollSeconds", "type": "number", "value": 15 },
-            { "id": "cfg-4", "name": "maxAttempts", "type": "number", "value": 80 }
+            {
+              "id": "cfg-1",
+              "name": "apiBaseUrl",
+              "type": "string",
+              "value": "http://localhost:4000"
+            },
+            {
+              "id": "cfg-2",
+              "name": "apiKey",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "cfg-3",
+              "name": "pollSeconds",
+              "type": "number",
+              "value": 15
+            },
+            {
+              "id": "cfg-4",
+              "name": "maxAttempts",
+              "type": "number",
+              "value": 80
+            }
           ]
         },
         "includeOtherFields": true,
@@ -167,7 +259,10 @@
       "name": "Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [60, 260]
+      "position": [
+        60,
+        260
+      ]
     },
     {
       "parameters": {
@@ -176,23 +271,61 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-API-Key", "value": "={{ $json.apiKey }}" }
+            {
+              "name": "X-API-Key",
+              "value": "={{ $json.apiKey }}"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "multipart-form-data",
         "bodyParameters": {
           "parameters": [
-            { "parameterType": "formData", "name": "style", "value": "={{ $json.style }}" },
-            { "parameterType": "formData", "name": "background", "value": "={{ $json.background }}" },
-            { "parameterType": "formData", "name": "title", "value": "={{ $json.title }}" },
-            { "parameterType": "formData", "name": "description", "value": "={{ $json.description }}" },
-            { "parameterType": "formData", "name": "episodeLabel", "value": "={{ $json.episodeLabel }}" },
-            { "parameterType": "formData", "name": "languageCode", "value": "={{ $json.languageCode }}" },
-            { "parameterType": "formData", "name": "fontColor", "value": "={{ $json.fontColor }}" },
-            { "parameterType": "formData", "name": "highlightColor", "value": "={{ $json.highlightColor }}" },
-            { "parameterType": "formData", "name": "configOverrides", "value": "={{ JSON.stringify({ background: { type: $json.backgroundType } }) }}" },
-            { "parameterType": "formBinaryData", "name": "audio", "inputDataFieldName": "={{ Object.keys($binary || {})[0] }}" }
+            {
+              "parameterType": "formData",
+              "name": "style",
+              "value": "={{ $json.style }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "background",
+              "value": "={{ $json.background }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "description",
+              "value": "={{ $json.description }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "episodeLabel",
+              "value": "={{ $json.episodeLabel }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "languageCode",
+              "value": "={{ $json.languageCode }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "fontColor",
+              "value": "={{ $json.fontColor }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "highlightColor",
+              "value": "={{ $json.highlightColor }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "audio",
+              "inputDataFieldName": "={{ Object.keys($binary || {}).find(k => /audio/i.test(k)) ?? Object.keys($binary || {})[0] }}"
+            }
           ]
         },
         "options": {}
@@ -201,7 +334,10 @@
       "name": "Upload Audio",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [280, 260]
+      "position": [
+        500,
+        140
+      ]
     },
     {
       "parameters": {
@@ -212,16 +348,22 @@
       "name": "Wait Before Check",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [500, 260]
+      "position": [
+        940,
+        260
+      ]
     },
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $('Config').item.json.apiBaseUrl }}{{ $('Upload Audio').item.json.statusUrl }}",
+        "url": "={{ $('Config').item.json.apiBaseUrl }}{{ $('Render Job').item.json.statusUrl }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-API-Key", "value": "={{ $('Config').item.json.apiKey }}" }
+            {
+              "name": "X-API-Key",
+              "value": "={{ $('Config').item.json.apiKey }}"
+            }
           ]
         },
         "options": {}
@@ -230,7 +372,10 @@
       "name": "Check Job Status",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [720, 260],
+      "position": [
+        1160,
+        260
+      ],
       "onError": "continueRegularOutput",
       "continueOnFail": true
     },
@@ -241,14 +386,20 @@
           "values": [
             {
               "conditions": {
-                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
                 "combinator": "and",
                 "conditions": [
                   {
                     "id": "sw-completed",
                     "leftValue": "={{ $json.status }}",
                     "rightValue": "completed",
-                    "operator": { "type": "string", "operation": "equals" }
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
                   }
                 ]
               },
@@ -257,26 +408,38 @@
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "typeValidation": "loose" },
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "loose"
+                },
                 "combinator": "or",
                 "conditions": [
                   {
                     "id": "sw-failed",
                     "leftValue": "={{ $json.status }}",
                     "rightValue": "failed",
-                    "operator": { "type": "string", "operation": "equals" }
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
                   },
                   {
                     "id": "sw-error",
                     "leftValue": "={{ $json.error }}",
                     "rightValue": "",
-                    "operator": { "type": "string", "operation": "exists" }
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists"
+                    }
                   },
                   {
                     "id": "sw-timeout",
                     "leftValue": "={{ $runIndex }}",
                     "rightValue": "={{ $('Config').item.json.maxAttempts }}",
-                    "operator": { "type": "number", "operation": "gte" }
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
                   }
                 ]
               },
@@ -285,27 +448,39 @@
             }
           ]
         },
-        "options": { "fallbackOutput": "extra", "renameFallbackOutput": "Processing" }
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Processing"
+        }
       },
       "id": "b1a1a1a1-0008-4a1a-8a1a-000000000008",
       "name": "Job Status Router",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [940, 260]
+      "position": [
+        1380,
+        260
+      ]
     },
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $('Config').item.json.apiBaseUrl }}{{ $('Upload Audio').item.json.downloadUrl }}",
+        "url": "={{ $('Config').item.json.apiBaseUrl }}{{ $('Render Job').item.json.downloadUrl }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-API-Key", "value": "={{ $('Config').item.json.apiKey }}" }
+            {
+              "name": "X-API-Key",
+              "value": "={{ $('Config').item.json.apiKey }}"
+            }
           ]
         },
         "options": {
           "response": {
-            "response": { "responseFormat": "file", "outputPropertyName": "data" }
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
           }
         }
       },
@@ -313,7 +488,10 @@
       "name": "Download Video",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1160, 140]
+      "position": [
+        1600,
+        140
+      ]
     },
     {
       "parameters": {
@@ -326,49 +504,312 @@
       "name": "Return Video",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1380, 140]
+      "position": [
+        1820,
+        140
+      ]
     },
     {
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { \"error\": $json.error || `Render failed with status: ${$json.status}` } }}",
-        "options": { "responseCode": 500 }
+        "options": {
+          "responseCode": 500
+        }
       },
       "id": "b1a1a1a1-000b-4a1a-8a1a-00000000000b",
       "name": "Return Error",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1160, 380]
+      "position": [
+        1600,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "has-cover",
+              "leftValue": "={{ Object.keys($binary || {}).length }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1a1a1a1-000c-4a1a-8a1a-00000000000c",
+      "name": "Has Cover Image?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        280,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.apiBaseUrl }}/render",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $json.apiKey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formData",
+              "name": "style",
+              "value": "={{ $json.style }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "background",
+              "value": "={{ $json.background }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "description",
+              "value": "={{ $json.description }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "episodeLabel",
+              "value": "={{ $json.episodeLabel }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "languageCode",
+              "value": "={{ $json.languageCode }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "fontColor",
+              "value": "={{ $json.fontColor }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "highlightColor",
+              "value": "={{ $json.highlightColor }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "audio",
+              "inputDataFieldName": "={{ Object.keys($binary || {}).find(k => /audio/i.test(k)) ?? Object.keys($binary || {})[0] }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "cover",
+              "inputDataFieldName": "={{ Object.keys($binary || {}).find(k => /cover|image/i.test(k)) ?? Object.keys($binary || {})[1] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1a1a1a1-000d-4a1a-8a1a-00000000000d",
+      "name": "Upload Audio + Cover",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "job-1",
+              "name": "statusUrl",
+              "type": "string",
+              "value": "={{ $json.statusUrl }}"
+            },
+            {
+              "id": "job-2",
+              "name": "downloadUrl",
+              "type": "string",
+              "value": "={{ $json.downloadUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1a1a1a1-000e-4a1a-8a1a-00000000000e",
+      "name": "Render Job",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        260
+      ]
     }
   ],
   "connections": {
     "Kinetic Render Form": {
-      "main": [[{ "node": "Read Form Fields", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Read Form Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Read Form Fields": {
-      "main": [[{ "node": "Config", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Config": {
-      "main": [[{ "node": "Upload Audio", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Has Cover Image?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Upload Audio": {
-      "main": [[{ "node": "Wait Before Check", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Render Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Wait Before Check": {
-      "main": [[{ "node": "Check Job Status", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Check Job Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Check Job Status": {
-      "main": [[{ "node": "Job Status Router", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Job Status Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Job Status Router": {
       "main": [
-        [{ "node": "Download Video", "type": "main", "index": 0 }],
-        [{ "node": "Return Error", "type": "main", "index": 0 }],
-        [{ "node": "Wait Before Check", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Download Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Before Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Download Video": {
-      "main": [[{ "node": "Return Video", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Return Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Cover Image?": {
+      "main": [
+        [
+          {
+            "node": "Upload Audio + Cover",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Audio + Cover": {
+      "main": [
+        [
+          {
+            "node": "Render Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render Job": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "pinData": {},
