@@ -119,7 +119,9 @@ Use this from any HTTP client that isn't sharing a filesystem with the server.
 | `languageCode` | text | no | UniScribe language code, default `en`. |
 | `outputFileName` | text | no | Output MP4 filename. Defaults to the **original uploaded filename** with its extension swapped to `.mp4` (e.g. `episode.mp3` → `episode.mp4`) — not the randomized name the file is stored under on disk. |
 | `style` | text | no | Shorthand for `reveal.style` (see [styles](#reveal-styles--show-metadata)). |
-| `background` | text | no | Shorthand for `background.color`, from a fixed preset: `white`, `black`, `grey`, `silver`, `blue` (see [`GET /styles`](#get-styles)). Only visible for `solid`-type backgrounds and the `waveform` backdrop; ignored by `gradient`/`video`. An unknown value returns `400`. |
+| `background` | text | no | Shorthand for `background.color` — either a preset (`white`, `black`, `grey`, `silver`, `blue`, see [`GET /styles`](#get-styles)) or any hex value like `#1E88E5`. Only visible for `solid`-type backgrounds and the `waveform` backdrop; ignored by `gradient`/`video`. An unknown value returns `400`. |
+| `fontColor` | text | no | Shorthand for `text.color` (hex, e.g. `#FFFFFF`). |
+| `highlightColor` | text | no | Shorthand for `text.highlightColor` (hex, e.g. `#FFD400`). |
 | `title` | text | no | Shorthand for `show.title`. |
 | `description` | text | no | Shorthand for `show.description`. |
 | `episodeLabel` | text | no | Shorthand for `show.episodeLabel`. |

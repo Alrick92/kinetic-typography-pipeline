@@ -1,8 +1,16 @@
 import path from "node:path";
 import { buildSchedule } from "./animation/schedule.js";
-import { hashFile, readCachedJobId, readCachedTranscript, writeCachedJobId, writeCachedTranscript } from "./cache.js";
+import {
+  clearCachedJobId,
+  hashFile,
+  readCachedJobId,
+  readCachedTranscript,
+  writeCachedJobId,
+  writeCachedTranscript,
+} from "./cache.js";
 import type { PipelineConfig, TranscriptResult } from "./types.js";
 import { parseUniScribeTranscript } from "./transcript/parse.js";
+import { TranscriptionFailedError } from "./errors.js";
 import { UniScribeClient, type UniScribeTranscription } from "./uniscribe/client.js";
 import { renderVideo } from "./render/renderVideo.js";
 import { stageLogger } from "./logger.js";
@@ -55,13 +63,23 @@ export async function runPipeline(opts: RunPipelineOptions): Promise<string> {
 
     const jobId = await getOrCreateJob(client, opts.audioFilePath, audioHash, opts.languageCode, opts.webhookUrl);
 
-    const completed = await client.pollUntilComplete(jobId, {
-      intervalMs: opts.config.uniscribe.pollIntervalMs,
-      timeoutMs: opts.config.uniscribe.pollTimeoutMs,
-    });
+    let completed: UniScribeTranscription;
+    try {
+      completed = await client.pollUntilComplete(jobId, {
+        intervalMs: opts.config.uniscribe.pollIntervalMs,
+        timeoutMs: opts.config.uniscribe.pollTimeoutMs,
+      });
+    } catch (err) {
+      // A job that failed or timed out is dead; drop its id so the next run creates a
+      // fresh job instead of resuming (and re-failing on) it forever. A transient
+      // network error keeps the id so the in-flight job can still be resumed.
+      if (err instanceof TranscriptionFailedError) clearCachedJobId(audioHash);
+      throw err;
+    }
 
     transcript = parseUniScribeTranscript(completed);
     writeCachedTranscript(audioHash, transcript);
+    clearCachedJobId(audioHash);
   }
 
   const outputFileName = resolveOutputFileName(opts.audioFilePath, opts.outputFileName);

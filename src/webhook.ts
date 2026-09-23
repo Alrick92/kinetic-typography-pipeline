@@ -12,7 +12,7 @@ import { requireApiKey } from "./api/auth.js";
 import { completeJob, createJob, failJob, jobs, pendingByUniScribeId } from "./api/jobStore.js";
 import { enqueueRenderTask, queueStats } from "./api/jobQueue.js";
 import { BACKGROUND_COLOR_CATALOG, BACKGROUND_TYPE_CATALOG, REVEAL_STYLE_CATALOG } from "./api/styleCatalog.js";
-import { resolveBackgroundColor } from "./backgroundColors.js";
+import { isHexColor, resolveBackgroundColor } from "./backgroundColors.js";
 import { finishPipelineFromTranscription, runPipeline, startTranscription, UniScribeClient } from "./pipeline.js";
 
 const log = stageLogger("api-server");
@@ -76,6 +76,15 @@ function buildInlineOverrides(body: Record<string, any>): Record<string, unknown
   let overrides: Record<string, unknown> = {};
   if (body.style) overrides.reveal = { style: body.style };
   if (body.background) overrides.background = { color: resolveBackgroundColor(body.background) };
+  if (body.fontColor) {
+    if (!isHexColor(body.fontColor)) throw new Error(`fontColor must be a hex color like #FFFFFF (got "${body.fontColor}")`);
+    overrides.text = { ...(overrides.text as object), color: body.fontColor };
+  }
+  if (body.highlightColor) {
+    if (!isHexColor(body.highlightColor))
+      throw new Error(`highlightColor must be a hex color like #FFD400 (got "${body.highlightColor}")`);
+    overrides.text = { ...(overrides.text as object), highlightColor: body.highlightColor };
+  }
   if (hasShowFields) overrides.show = showFields;
 
   const configOverrides = parseConfigOverrides(body.configOverrides);

@@ -65,7 +65,12 @@ npm run cli -- render --input ./data/episode.mp3
 npm run cli -- render --input ./data/episode.mp3 --config ./config/karaoke-horizontal.yaml
 npm run cli -- render --input ./data/episode.mp3 --output episode-final.mp4 --language en
 npm run cli -- render --input ./data/episode.mp3 --style karaoke --background blue
+npm run cli -- render --input ./data/episode.mp3 --background "#1E88E5" --font-color "#FFFFFF" --highlight-color "#FFD400"
 ```
+
+`--background` takes either a preset name (`white`, `black`, `grey`, `silver`,
+`blue`) or any hex value; `--font-color` / `--highlight-color` set `text.color` and
+`text.highlightColor`.
 
 Exit codes are non-zero on any failure, with the failing stage and a human-readable
 message logged (see `src/errors.ts` for the full list — invalid API key, plan-tier
@@ -170,10 +175,12 @@ instead of dedicated fields.
 
 ### Background types
 
-- `solid` — flat `background.color`. Set it with `--background <name>` (CLI) or the
-  `background` field (webhook/n8n) from a fixed preset — `white`, `black`, `grey`,
-  `silver`, `blue` — instead of a raw hex value; also affects the `waveform` type's
-  backdrop (both read `background.color`). Ignored by `gradient`/`video`.
+- `solid` — flat `background.color`. Set it with `--background <color>` (CLI) or the
+  `background` field (webhook/n8n) — either a preset (`white`, `black`, `grey`,
+  `silver`, `blue`) or any hex value like `#1E88E5`. Text color/highlight are set
+  separately with `--font-color` / `--highlight-color` or `text.color` /
+  `text.highlightColor` in a config. Both also affect the `waveform` type's backdrop
+  (it reads `background.color`). Ignored by `gradient`/`video`.
 - `gradient` — linear gradient between `background.gradient.from`/`to` at `angle` degrees.
 - `video` — looping video or static image; set `background.mediaPath` to a file path
   (it's copied into `remotion/public/backgrounds/` automatically at render time).

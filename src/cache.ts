@@ -42,3 +42,13 @@ export function writeCachedJobId(hash: string, jobId: string): void {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, JSON.stringify({ jobId, createdAt: new Date().toISOString() }, null, 2));
 }
+
+/**
+ * Drops the persisted in-flight job id once its transcript is cached. Without this a
+ * failed/timed-out job's id lingers forever, so every later run of the same audio
+ * resumes that dead job instead of creating a fresh one.
+ */
+export function clearCachedJobId(hash: string): void {
+  const file = jobIdCachePath(hash);
+  if (fs.existsSync(file)) fs.rmSync(file);
+}

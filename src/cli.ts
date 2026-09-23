@@ -7,7 +7,7 @@ import { loadConfig } from "./config.js";
 import { runPipeline } from "./pipeline.js";
 import { PipelineError } from "./errors.js";
 import { logger } from "./logger.js";
-import { resolveBackgroundColor } from "./backgroundColors.js";
+import { isHexColor, resolveBackgroundColor } from "./backgroundColors.js";
 
 const program = new Command();
 
@@ -25,7 +25,9 @@ program
   .option("-o, --output <file>", "output MP4 filename (relative to output.directory)")
   .option("-w, --webhook-url <url>", "UniScribe webhook URL for completion notification")
   .option("--style <style>", "reveal style override: word-pop, karaoke, focus-word, clean-feed, lyrics-scroll, quote-card, vertical-show, orbit")
-  .option("--background <name>", "background color preset: white, black, grey, silver, blue")
+  .option("--background <color>", "background color: a preset (white, black, grey, silver, blue) or a hex value like #1E88E5")
+  .option("--font-color <color>", "text color (hex, e.g. #FFFFFF)")
+  .option("--highlight-color <color>", "highlight/active-word color (hex, e.g. #FFD400)")
   .option("--title <text>", "video title (used by vertical-show / orbit styles)")
   .option("--cover-image <path>", "path to a cover/avatar image (used by vertical-show / orbit styles)")
   .option("--description <text>", "short description line (used by vertical-show / orbit styles)")
@@ -42,10 +44,24 @@ program
         episodeLabel: options.episodeLabel,
       };
       const hasShowOverrides = Object.values(showOverrides).some((v) => v !== undefined);
+      if (options.fontColor && !isHexColor(options.fontColor)) {
+        throw new PipelineError("config", `--font-color must be a hex color like #FFFFFF (got "${options.fontColor}")`, 9);
+      }
+      if (options.highlightColor && !isHexColor(options.highlightColor)) {
+        throw new PipelineError("config", `--highlight-color must be a hex color like #FFD400 (got "${options.highlightColor}")`, 9);
+      }
       const inlineOverrides = {
         ...(options.style ? { reveal: { style: options.style } } : {}),
         ...(options.background ? { background: { color: resolveBackgroundColor(options.background) } } : {}),
         ...(hasShowOverrides ? { show: showOverrides } : {}),
+        ...(options.fontColor || options.highlightColor
+          ? {
+              text: {
+                ...(options.fontColor ? { color: options.fontColor } : {}),
+                ...(options.highlightColor ? { highlightColor: options.highlightColor } : {}),
+              },
+            }
+          : {}),
       };
       const config = loadConfig(options.config, Object.keys(inlineOverrides).length > 0 ? inlineOverrides : undefined);
       const outputPath = await runPipeline({

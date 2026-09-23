@@ -27,7 +27,7 @@ export const KaraokeComposition: React.FC<RenderInputProps> = ({ schedule, confi
 
   return (
     <AbsoluteFill>
-      <AbsoluteFill style={{ justifyContent, alignItems: "center", paddingBottom, padding: "0 8%" }}>
+        <AbsoluteFill style={{ justifyContent, alignItems: "center", paddingBottom, paddingLeft: "8%", paddingRight: "8%" }}>
         {phrase ? (
           <div
             style={{
