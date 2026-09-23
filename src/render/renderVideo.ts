@@ -12,6 +12,9 @@ const log = stageLogger("render");
 
 const REMOTION_ENTRY = path.resolve(process.cwd(), "remotion/index.ts");
 const REMOTION_PUBLIC_DIR = path.resolve(process.cwd(), "remotion/public");
+// Optional path to an existing Chrome/Chromium binary. Unset, Remotion downloads its
+// own headless shell on first render, which fails on hosts without outbound access.
+const BROWSER_EXECUTABLE = process.env.REMOTION_BROWSER_EXECUTABLE || null;
 
 const REVEAL_STYLE_TO_COMPOSITION: Record<string, string> = {
   "focus-word": "FocusWord",
@@ -86,6 +89,7 @@ export async function renderVideo(opts: RenderOptions): Promise<string> {
     serveUrl: bundleLocation,
     id: compositionId,
     inputProps,
+    browserExecutable: BROWSER_EXECUTABLE,
   }).catch((err) => {
     throw new RenderError(`Failed to select composition "${compositionId}": ${(err as Error).message}`);
   });
@@ -109,6 +113,7 @@ export async function renderVideo(opts: RenderOptions): Promise<string> {
       serveUrl: bundleLocation,
       codec: "h264",
       audioCodec: "aac",
+      browserExecutable: BROWSER_EXECUTABLE,
       outputLocation,
       inputProps,
       onProgress: ({ progress }) => {

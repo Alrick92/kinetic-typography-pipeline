@@ -10,6 +10,7 @@
  *   background-type: solid | gradient | waveform
  *   background-color: white | black | grey | silver | blue, or a hex value like #1E88E5
  *   SMOKETEST_FONT_COLOR / SMOKETEST_HIGHLIGHT_COLOR: hex text/active-word colors
+ *   SMOKETEST_COVER_IMAGE: path to a cover image (shown by vertical-show / orbit)
  */
 import "dotenv/config";
 import path from "node:path";
@@ -75,6 +76,12 @@ async function main() {
           },
         }
       : {}),
+    show: {
+      title: "Smoke Test",
+      description: "Kinetic Typography Pipeline",
+      episodeLabel: "EP. 01",
+      ...(process.env.SMOKETEST_COVER_IMAGE ? { coverImagePath: path.resolve(process.env.SMOKETEST_COVER_IMAGE) } : {}),
+    },
   });
   const transcript = buildFakeTranscript();
   const schedule = buildSchedule(transcript, style);

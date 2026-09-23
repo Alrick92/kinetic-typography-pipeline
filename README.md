@@ -56,6 +56,7 @@ npm run test:uniscribe
 | `PUBLIC_BASE_URL` | Public URL this container is reachable at — only required if you trigger renders with `mode: "webhook"` |
 | `API_KEY` | Optional shared-secret for the HTTP API — see [docs/API.md](docs/API.md#authentication) |
 | `LOG_LEVEL` | pino log level (default `info`) |
+| `REMOTION_BROWSER_EXECUTABLE` | Optional path to an existing Chrome/Chromium binary to render with. Unset, Remotion downloads its own headless shell on the first render (needs outbound access to `remotion.media`) |
 
 ## CLI usage
 
@@ -143,6 +144,10 @@ band gets across the whole track (`remotion/util/useAudioBands.ts`), so beats an
 stressed syllables visibly hit on quiet speech as well as loud music, and silence
 stays flat.
 
+![The four reveal styles](docs/screenshots/all-styles.png)
+
+![Waveform and spectrum at rest in silence, swelling on a beat](docs/screenshots/beat-sync.png)
+
 `vertical-show` and `orbit` already draw their own waveform/spectrum — pair them with
 `background.type: solid` or `gradient`, not `waveform` (both would render). A ready-made
 solid lime-green/dark-text look matching that combination is in
@@ -201,6 +206,40 @@ instead of dedicated fields.
   on the OS having it installed. Any other configured font name falls back to a
   generic system-font stack. To wire up a different Google Font the same way, swap
   the import in `fonts.ts` for another `@remotion/google-fonts/<FontName>` subpackage.
+
+## Testing
+
+```bash
+npm run typecheck        # TypeScript across src/, remotion/ and scripts/
+npm run test:uniscribe   # checks your UniScribe key/plan and timestamp granularity (needs UNISCRIBE_API_KEY)
+npm run test:render -- orbit solid "#C6FF34"   # renders output/smoketest-orbit-solid.mp4, no UniScribe call
+```
+
+`test:render` takes `[style] [background-type] [background-color]` (style is one of
+`focus-word`, `clean-feed`, `vertical-show`, `orbit`) and renders a ~40s clip from a
+synthetic transcript over `data/smoketest.wav`. Optional env vars:
+`SMOKETEST_FONT_COLOR`, `SMOKETEST_HIGHLIGHT_COLOR` (hex), `SMOKETEST_COVER_IMAGE`
+(path to the image shown by `vertical-show`/`orbit`), and
+`SMOKETEST_ORIENTATION=horizontal`. To check all four styles with your own colors and
+image:
+
+```bash
+for s in focus-word clean-feed vertical-show orbit; do
+  SMOKETEST_COVER_IMAGE=data/cover.jpg SMOKETEST_FONT_COLOR="#111111" SMOKETEST_HIGHLIGHT_COLOR="#111111" \
+    npm run test:render -- $s solid "#C6FF34"
+done
+```
+
+To check the API end to end, start it with `npm run webhook` and:
+
+```bash
+curl localhost:4000/health
+curl localhost:4000/styles           # revealStyles lists exactly the four styles
+curl -X POST localhost:4000/render -F "audio=@data/smoketest.wav" -F "cover=@data/cover.jpg" \
+  -F "style=orbit" -F "background=#C6FF34" -F "fontColor=#111111" -F "highlightColor=#111111"
+```
+
+A removed style (e.g. `style=karaoke`) or a non-hex color returns `400` with the reason.
 
 ## Docker
 
